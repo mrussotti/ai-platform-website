@@ -21,4 +21,4 @@ You need to have the following installed:
 #### Contributing
 - Create a feature based on the development branch
 - Make your changes then open a pull request into the development branch
-- Have a peer review your code and if everything is in order, approve the pull request
+- Have a peer review your code and if everything is in order, they approve will the pull request
