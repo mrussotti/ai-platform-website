@@ -27,7 +27,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ec2-user@52.15.69.16 << 'EOF'
-            cd /path-to-your-project
+            cd /ai-platform-website
             git pull origin main
             npm install
             npm run build
