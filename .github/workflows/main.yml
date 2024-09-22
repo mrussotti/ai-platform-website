@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   build:
@@ -29,3 +26,14 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ec2-user@your-ec2-public-ip << 'EOF'
+            cd /path-to-your-project
+            git pull origin main
+            npm install
+            npm run build
+            sudo cp -r build/* /var/www/html/
+            sudo systemctl restart nginx
+          EOF
