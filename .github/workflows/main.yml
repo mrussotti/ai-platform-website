@@ -26,15 +26,12 @@ jobs:
 
       - name: Deploy to EC2
         env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
-          # Write the private SSH key to a temporary file
-          echo "$EC2_SSH_KEY" > /tmp/ec2_key.pem
-          # Set correct permissions for the key
-          chmod 600 /tmp/ec2_key.pem
-          # Use the key to SSH into the EC2 instance and run the commands
-          ssh -o StrictHostKeyChecking=no -i /tmp/ec2_key.pem ec2-user@52.15.69.16 << 'EOF'
-            cd /ai-platform-website
+          echo "${SSH_PRIVATE_KEY}" > key.pem
+          chmod 600 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@52.15.69.16 << 'EOF'
+            cd /path-to-your-project
             git pull origin main
             npm install
             npm run build
