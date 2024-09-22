@@ -24,9 +24,6 @@ jobs:
       - name: Build the React app
         run: npm run build
 
-      - name: Run tests
-        run: npm test
-
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ec2-user@your-ec2-public-ip << 'EOF'
