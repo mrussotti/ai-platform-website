@@ -1,4 +1,5 @@
 import HeroSection from "../components/HeroSection"
+import DataFetcher from "../components/DataFetcher"
 import React, { useEffect } from 'react'
 
 export default function Home(){
@@ -7,6 +8,7 @@ export default function Home(){
     }, []);
 
     return (
-        <HeroSection/>
+        <><HeroSection />
+        <DataFetcher /></>
     )
 }
