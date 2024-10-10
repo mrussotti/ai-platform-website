@@ -1,0 +1,17 @@
+{
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "neo4JUri",
+      "environmentVariableName": "NEO4J_URI"
+    },
+    {
+      "cloudFormationParameterName": "neo4JUsername",
+      "environmentVariableName": "NEO4J_USERNAME"
+    },
+    {
+      "cloudFormationParameterName": "neo4JPassword",
+      "environmentVariableName": "NEO4J_PASSWORD"
+    }
+  ]
+}
