@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "paths": {
+    "/neo4j": {
+      "name": "/neo4j",
+      "lambdaFunction": "neo4jFunction",
+      "permissions": {
+        "setting": "open"
+      }
+    }
+  }
+}
