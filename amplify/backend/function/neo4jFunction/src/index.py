@@ -4,68 +4,138 @@ import socket
 from neo4j import GraphDatabase
 from neo4j.exceptions import Neo4jError
 
-# Retrieve environment variables
-NEO4J_URI = os.environ.get('NEO4J_URI')
-NEO4J_USERNAME = os.environ.get('NEO4J_USERNAME')
-NEO4J_PASSWORD = os.environ.get('NEO4J_PASSWORD')
+def validate_query(query):
+    allowed_keywords = ['MATCH', 'RETURN', 'WHERE', 'LIMIT', 'SKIP', 'ORDER BY']
+    disallowed_keywords = ['CREATE', 'MERGE', 'DELETE', 'SET', 'DROP', 'REMOVE', 'CALL', 'LOAD', 'UNWIND']
 
-# Log environment variables for debugging
-print('NEO4J_URI:', NEO4J_URI)
-print('NEO4J_USERNAME:', NEO4J_USERNAME)
+    query_upper = query.upper()
 
-# Initialize Neo4j driver
-try:
-    driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
-except Exception as e:
-    print('Error initializing Neo4j driver:', e)
+    # Check for disallowed keywords
+    if any(keyword in query_upper for keyword in disallowed_keywords):
+        return False
+
+    # Ensure the query starts with an allowed keyword
+    if not any(query_upper.strip().startswith(keyword) for keyword in allowed_keywords):
+        return False
+
+    return True
 
 def lambda_handler(event, context):
-    # Log the event for debugging
     print('Received event:', json.dumps(event))
 
-    # Test DNS resolution
-    try:
-        from urllib.parse import urlparse
-        parsed_uri = urlparse(NEO4J_URI)
-        hostname = parsed_uri.hostname
-        ip = socket.gethostbyname(hostname)
-        print(f'Resolved {hostname} to IP:', ip)
-    except Exception as e:
-        print('DNS resolution error:', e)
-    # Parse HTTP method and path
     http_method = event.get('httpMethod', '')
     path = event.get('path', '')
 
-    if http_method == 'GET' and path.endswith('/neo4j'):
-        try:
-            with driver.session() as session:
-                # Sample Cypher query
-                result = session.run('MATCH (n) RETURN n LIMIT 10')
-                print(result)
-                # Extract data
-                records = [dict(record['n']) for record in result]
-                # Build response
-                response = {
-                    'statusCode': 200,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
-                    'body': json.dumps(records)
-                }
-                return response
-        except Neo4jError as e:
-            print('Neo4jError:', e)
+    path_parts = path.strip('/').split('/')
+    if len(path_parts) >= 2 and path_parts[0] == 'neo4j':
+        dbname = path_parts[1]
+        uri_env = f'NEO4J_URI_{dbname}'
+        username_env = f'NEO4J_USERNAME_{dbname}'
+        password_env = f'NEO4J_PASSWORD_{dbname}'
+
+        NEO4J_URI = os.environ.get(uri_env)
+        NEO4J_USERNAME = os.environ.get(username_env)
+        NEO4J_PASSWORD = os.environ.get(password_env)
+
+        if not NEO4J_URI or not NEO4J_USERNAME or not NEO4J_PASSWORD:
             response = {
-                'statusCode': 500,
-                'body': json.dumps({'error': 'Database error: ' + str(e)})
+                'statusCode': 400,
+                'body': json.dumps({'error': f'Invalid database name or missing credentials for {dbname}'})
             }
             return response
+
+        try:
+            with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD)) as driver:
+                if http_method == 'GET':
+                    try:
+                        with driver.session() as session:
+                            result = session.run('MATCH (n) RETURN n LIMIT 10')
+                            records = [dict(record['n']) for record in result]
+                            response = {
+                                'statusCode': 200,
+                                'headers': {
+                                    'Content-Type': 'application/json',
+                                    'Access-Control-Allow-Origin': '*'
+                                },
+                                'body': json.dumps(records)
+                            }
+                            return response
+                    except Neo4jError as e:
+                        print('Neo4jError:', e)
+                        response = {
+                            'statusCode': 500,
+                            'body': json.dumps({'error': 'Database error: ' + str(e)})
+                        }
+                        return response
+                    except Exception as e:
+                        print('General Exception:', e)
+                        response = {
+                            'statusCode': 500,
+                            'body': json.dumps({'error': 'Internal server error: ' + str(e)})
+                        }
+                        return response
+                elif http_method == 'POST':
+                    # Handle custom query
+                    try:
+                        body = json.loads(event.get('body', '{}'))
+                        query = body.get('query', '')
+                        if not query:
+                            response = {
+                                'statusCode': 400,
+                                'body': json.dumps({'error': 'No query provided'})
+                            }
+                            return response
+                        # Validate query
+                        if not validate_query(query):
+                            response = {
+                                'statusCode': 400,
+                                'body': json.dumps({'error': 'Invalid query'})
+                            }
+                            return response
+                        with driver.session() as session:
+                            result = session.run(query)
+                            records = [dict(record) for record in result]
+                            response = {
+                                'statusCode': 200,
+                                'headers': {
+                                    'Content-Type': 'application/json',
+                                    'Access-Control-Allow-Origin': '*'
+                                },
+                                'body': json.dumps(records)
+                            }
+                            return response
+                    except Neo4jError as e:
+                        print('Neo4jError:', e)
+                        response = {
+                            'statusCode': 500,
+                            'body': json.dumps({'error': 'Database error: ' + str(e)})
+                        }
+                        return response
+                    except ValueError as e:
+                        print('Validation Error:', e)
+                        response = {
+                            'statusCode': 400,
+                            'body': json.dumps({'error': str(e)})
+                        }
+                        return response
+                    except Exception as e:
+                        print('General Exception:', e)
+                        response = {
+                            'statusCode': 500,
+                            'body': json.dumps({'error': 'Internal server error: ' + str(e)})
+                        }
+                        return response
+                else:
+                    response = {
+                        'statusCode': 405,
+                        'body': json.dumps({'error': 'Method Not Allowed'})
+                    }
+                    return response
         except Exception as e:
-            print('General Exception:', e)
+            print('Error initializing Neo4j driver:', e)
             response = {
                 'statusCode': 500,
-                'body': json.dumps({'error': 'Internal server error: ' + str(e)})
+                'body': json.dumps({'error': 'Error initializing Neo4j driver: ' + str(e)})
             }
             return response
     else:
