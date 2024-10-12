@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './HeroSection.module.css'; 
+import styles from './css/HeroSection.module.css'; 
 import osuImage from '../assets/osu.jpg'; 
 
 function HeroSection() {
