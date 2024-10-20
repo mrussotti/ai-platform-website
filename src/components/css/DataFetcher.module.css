@@ -1,0 +1,116 @@
+.dataFetcherContainer {
+    margin: 20px;
+  }
+  
+  /* Adjust .form to align items horizontally */
+  .form {
+    display: flex;
+    align-items: center; /* Align vertically in the same line */
+    justify-content: flex-start; /* Left align the input, submit, and reset button */
+    margin-bottom: 20px;
+    gap: 10px; /* Adds some spacing between the elements */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  }
+  
+  /* Styling the label */
+  .label {
+    margin-right: 10px;
+    font-weight: bold;
+    color: #fff;
+  }
+  
+  /* Styling the input */
+  .input {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #add8e6; /* Light blue border */
+    border-radius: 5px;
+    background-color: #f0f8ff; /* AliceBlue */
+  }
+  
+  /* Focus state for input */
+  .input:focus {
+    outline: none;
+    border-color: #6495ed; /* Cornflower blue */
+    background-color: #e6f2ff; /* Slightly darker blue */
+  }
+  
+  /* Button container to align buttons horizontally */
+  .buttonContainer {
+    display: flex;
+    gap: 10px; /* Adds spacing between the buttons */
+    align-items: center; /* Align buttons vertically */
+  }
+  
+  /* Styling submit button */
+  .button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    background-color: #add8e6; /* Light blue */
+    color: black;
+  }
+  
+  .button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  /* Hover state for button */
+  .button:hover:not(:disabled) {
+    background-color: #6495ed; /* Cornflower blue */
+  }
+  
+  /* Styling reset button */
+  .resetButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    background-color: #f0f0f0; /* Light gray */
+    color: black;
+  }
+  
+  .resetButton:hover {
+    background-color: #e0e0e0;
+  }
+  
+  /* Styling preset query buttons */
+  .presetButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    background-color: #90ee90; /* Light green */
+    color: black;
+  }
+  
+  .presetButton:hover {
+    background-color: #32cd32; /* Lime green */
+  }
+  
+  /* Centering the preset buttons */
+  .presetContainer {
+    display: flex;
+    justify-content: center; /* Center the preset buttons */
+    gap: 10px; /* Adds space between the preset buttons */
+    margin-top: 20px;
+  }
+  
+  /* Error message styling */
+  .errorMessage {
+    color: red;
+    font-weight: bold;
+  }
+  

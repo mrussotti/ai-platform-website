@@ -1,5 +1,8 @@
+// DataFetcher.js
+
 import React, { useState, useEffect } from 'react';
 import DataDisplay from './DataDisplay';
+import styles from './css/DataFetcher.module.css';
 
 export default function DataFetcher({ dbname }) {
   const [data, setData] = useState([]);
@@ -9,6 +12,14 @@ export default function DataFetcher({ dbname }) {
   const [customQuery, setCustomQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Preset queries
+  const presetQueries = [
+    {
+      label: 'Fetch 5 Nodes',
+      query: 'MATCH (n) RETURN n LIMIT 5',
+    },
+  ];
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!customQuery.trim()) {
@@ -17,6 +28,19 @@ export default function DataFetcher({ dbname }) {
     }
     setIsSubmitting(true);
     fetchData(customQuery);
+  };
+
+  // New function to handle preset query button clicks
+  const handlePresetClick = (query) => {
+    setCustomQuery(query);
+    setIsSubmitting(true);
+    fetchData(query);
+  };
+
+  const handleReset = () => {
+    setCustomQuery('');
+    setIsSubmitting(false);
+    fetchData(); // Fetch default data
   };
 
   const fetchData = (query = null) => {
@@ -54,6 +78,7 @@ export default function DataFetcher({ dbname }) {
         setData(data);
         setLoading(false);
         setIsSubmitting(false);
+        // Do not clear the input field to show the current query
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
@@ -68,29 +93,49 @@ export default function DataFetcher({ dbname }) {
   }, [dbname]);
 
   return (
-    <div>
+    <div className={styles.dataFetcherContainer}>
       {/* Query Input Form */}
-      <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-        <label>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <label htmlFor="customQuery" className={styles.label}>
           Enter Custom Query:
-          <input
-            type="text"
-            value={customQuery}
-            onChange={(e) => setCustomQuery(e.target.value)}
-            placeholder="e.g., MATCH (n) RETURN n LIMIT 5"
-            style={{ marginLeft: '10px', width: '60%' }}
-          />
         </label>
-        <button type="submit" disabled={isSubmitting} style={{ marginLeft: '10px' }}>
-          {isSubmitting ? 'Submitting...' : 'Submit'}
-        </button>
+        <input
+          type="text"
+          id="customQuery"
+          value={customQuery}
+          onChange={(e) => setCustomQuery(e.target.value)}
+          placeholder="e.g., MATCH (n) RETURN n LIMIT 5"
+          className={styles.input}
+        />
+        <div className={styles.buttonContainer}>
+          <button type="submit" disabled={isSubmitting} className={styles.button}>
+            {isSubmitting ? 'Submitting...' : 'Submit'}
+          </button>
+          <button type="button" onClick={handleReset} className={styles.resetButton}>
+            Reset to Default
+          </button>
+        </div>
       </form>
+
+      {/* Preset Query Buttons */}
+      <div className={styles.presetContainer}>
+        {presetQueries.map((preset, index) => (
+          <button
+            key={index}
+            type="button"
+            className={styles.presetButton}
+            onClick={() => handlePresetClick(preset.query)}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
 
       {/* Display Loading, Error, or Data */}
       {loading ? (
         <p>Loading data...</p>
       ) : error ? (
-        <p>Error fetching data: {error.message}</p>
+        <p className={styles.errorMessage}>Error fetching data: {error.message}</p>
       ) : (
         <DataDisplay data={data} />
       )}
