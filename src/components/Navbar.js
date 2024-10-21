@@ -87,7 +87,7 @@ export default function Navbar() {
                   >
                     Projects
                   </NavLink>
-                  <NavLink
+                  {/* <NavLink
                     to="calendar"
                     className={({ isActive }) =>
                       `rounded-md px-3 py-2 text-sm font-medium ${
@@ -96,7 +96,7 @@ export default function Navbar() {
                     }
                   >
                     Calendar
-                  </NavLink>
+                  </NavLink> */}
                 </div>
               </div>
             </div>
