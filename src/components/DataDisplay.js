@@ -3,7 +3,16 @@ import styles from './css/DataDisplay.module.css';
 
 export default function DataDisplay({ data }) {
   console.log(data);
-  if (!data.length) {
+
+  if (!data) {
+    return <p>No data available.</p>;
+  }
+
+  if (data.message) {
+    return <p>{data.message}</p>;
+  }
+
+  if (Array.isArray(data) && data.length === 0) {
     return <p>No data available.</p>;
   }
 
@@ -12,12 +21,11 @@ export default function DataDisplay({ data }) {
       <h2 className={styles.heading}>Query Results</h2>
       <div className={styles.nodesContainer}>
         {data.map((item, index) => {
-          // Check if the item has a single key
           const keys = Object.keys(item);
           let content = null;
 
           if (keys.length === 1 && typeof item[keys[0]] === 'object') {
-            // If item has a single key and its value is an object, display its properties
+            // for if item has a single key and its value is an object, display its properties
             const innerObject = item[keys[0]];
             content = Object.entries(innerObject).map(([key, value]) => (
               <div key={key}>
@@ -25,7 +33,7 @@ export default function DataDisplay({ data }) {
               </div>
             ));
           } else {
-            // Otherwise, display the item properties directly
+            //else display the item properties directly
             content = Object.entries(item).map(([key, value]) => (
               <div key={key}>
                 <strong>{key}:</strong> {JSON.stringify(value)}
