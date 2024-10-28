@@ -5,18 +5,20 @@ from neo4j.exceptions import Neo4jError
 from neo4j.graph import Node, Relationship
 
 def validate_query(query):
-    allowed_keywords = ['MATCH', 'RETURN', 'WHERE', 'LIMIT', 'SKIP', 'ORDER BY']
-    disallowed_keywords = ['CREATE', 'MERGE', 'DELETE', 'SET', 'DROP', 'REMOVE', 'CALL', 'LOAD', 'UNWIND']
+    # we aren't using this but i figured we could keep it for future use maybe
 
-    query_upper = query.upper()
+    # allowed_keywords = ['MATCH', 'RETURN', 'WHERE', 'LIMIT', 'SKIP', 'ORDER BY']
+    # disallowed_keywords = ['CREATE', 'MERGE', 'DELETE', 'SET', 'DROP', 'REMOVE', 'CALL', 'LOAD', 'UNWIND']
 
-    # Check for disallowed keywords
-    if any(keyword in query_upper for keyword in disallowed_keywords):
-        return False
+    # query_upper = query.upper()
 
-    # Ensure the query starts with an allowed keyword
-    if not any(query_upper.strip().startswith(keyword) for keyword in allowed_keywords):
-        return False
+    # # Check for disallowed keywords
+    # if any(keyword in query_upper for keyword in disallowed_keywords):
+    #     return False
+
+    # # Ensure the query starts with an allowed keyword
+    # if not any(query_upper.strip().startswith(keyword) for keyword in allowed_keywords):
+    #     return False
 
     return True
 
