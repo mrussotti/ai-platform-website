@@ -132,22 +132,31 @@ export default function DataFetcher({ dbname }) {
 
   return (
     <div className={styles.dataFetcherContainer}>
+
       {/* Query Input Form */}
       <form onSubmit={handleSubmit} className={styles.form}>
         <label htmlFor="customQuery" className={styles.label}>
           Enter Custom Query:
         </label>
-        <input
-          type="text"
+        <textarea
           id="customQuery"
           value={customQuery}
           onChange={(e) => setCustomQuery(e.target.value)}
           placeholder="e.g., MATCH (n) RETURN n LIMIT 5"
           className={styles.input}
+          rows={4} // Adjust the number of visible rows as needed
         />
         <div className={styles.buttonContainer}>
           <button type="submit" disabled={isSubmitting} className={styles.button}>
             {isSubmitting ? 'Submitting...' : 'Submit'}
+          </button>
+          <button
+            type="button"
+            className={styles.exportButton}
+            onClick={handleExport}
+            disabled={loading}
+          >
+            {loading ? 'Exporting...' : 'Download CSV'}
           </button>
           <button type="button" onClick={handleReset} className={styles.resetButton}>
             Reset to Default
@@ -155,7 +164,7 @@ export default function DataFetcher({ dbname }) {
         </div>
       </form>
 
-      {/* Preset Query Buttons and Export Button */}
+      {/* Preset Query Buttons */}
       <div className={styles.presetContainer}>
         {presetQueries.map((preset, index) => (
           <button
@@ -167,21 +176,11 @@ export default function DataFetcher({ dbname }) {
             {preset.label}
           </button>
         ))}
-
-        {/* Export Button */}
-        <button
-          type="button"
-          className={styles.exportButton}
-          onClick={handleExport}
-          disabled={loading}
-        >
-          {loading ? 'Exporting...' : 'Download CSV'}
-        </button>
       </div>
 
       {/* Display Loading, Error, or Data */}
       {loading ? (
-        <p>Loading data...</p>
+        <p>Loading data from {dbname}...</p>
       ) : error ? (
         <p className={styles.errorMessage}>Error: {error.message}</p>
       ) : (

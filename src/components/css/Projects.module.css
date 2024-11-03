@@ -1,0 +1,28 @@
+.dbSelector {
+    justify-content: center;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .dbSelector label {
+    font-weight: bold;
+    color: #fff;
+  }
+  
+  .dbSelector select {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #add8e6; 
+    border-radius: 5px;
+    background-color: #f0f8ff; 
+    color: black;
+  }
+  
+  .dbSelector select:focus {
+    outline: none;
+    border-color: #6495ed; 
+    background-color: #e6f2ff; 
+  }
+  
