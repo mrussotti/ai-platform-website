@@ -1,3 +1,5 @@
+// DataFetcher.js
+
 import React, { useState, useEffect } from 'react';
 import DataDisplay from './DataDisplay';
 import styles from './css/DataFetcher.module.css';
@@ -24,7 +26,6 @@ export default function DataFetcher({ dbname }) {
       query: "MATCH (n {name: 'New Person'}) DELETE n",
     },    
   ];
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -40,12 +41,11 @@ export default function DataFetcher({ dbname }) {
     setCustomQuery(query);
     setError(null); 
   };
-  
 
   const handleReset = () => {
     setCustomQuery('');
     setIsSubmitting(false);
-    fetchData(); //the default
+    fetchData(); // Fetch default data
   };
 
   const fetchData = (query = null) => {
@@ -96,6 +96,40 @@ export default function DataFetcher({ dbname }) {
     fetchData();
   }, [dbname]);
 
+  const handleExport = () => {
+    setLoading(true);
+    setError(null);
+
+    const apiUrl = `https://gjz0zq3tyd.execute-api.us-east-1.amazonaws.com/dev/neo4j/${dbname}?export=csv`;
+
+    fetch(apiUrl)
+      .then((response) => {
+        if (!response.ok) {
+          return response.text().then((errorText) => {
+            throw new Error(`Error: ${response.status} - ${errorText}`);
+          });
+        }
+        return response.text().then((csvData) => {
+          setLoading(false);
+          // Create a Blob from the CSV data
+          const blob = new Blob([csvData], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          // Create a link to download the CSV file
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'graph_export.csv');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        });
+      })
+      .catch((error) => {
+        console.error('Error exporting data:', error);
+        setError(error);
+        setLoading(false);
+      });
+  };
+
   return (
     <div className={styles.dataFetcherContainer}>
       {/* Query Input Form */}
@@ -121,7 +155,7 @@ export default function DataFetcher({ dbname }) {
         </div>
       </form>
 
-      {/* Preset Query Buttons */}
+      {/* Preset Query Buttons and Export Button */}
       <div className={styles.presetContainer}>
         {presetQueries.map((preset, index) => (
           <button
@@ -133,13 +167,23 @@ export default function DataFetcher({ dbname }) {
             {preset.label}
           </button>
         ))}
+
+        {/* Export Button */}
+        <button
+          type="button"
+          className={styles.exportButton}
+          onClick={handleExport}
+          disabled={loading}
+        >
+          {loading ? 'Exporting...' : 'Download CSV'}
+        </button>
       </div>
 
       {/* Display Loading, Error, or Data */}
       {loading ? (
         <p>Loading data...</p>
       ) : error ? (
-        <p className={styles.errorMessage}>Error fetching data: {error.message}</p>
+        <p className={styles.errorMessage}>Error: {error.message}</p>
       ) : (
         <DataDisplay data={data} />
       )}
