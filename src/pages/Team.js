@@ -37,7 +37,7 @@ export default function Team() {
     {
       name: "Bhabatosh Senapati",
       major: "Masters in Computer Science and Engineering",
-      year: "Final Year",
+      year: "3rd sem masters",
       bio: "I've honed my skills at Niv-Tech Solutions, where I led API and SSO projects, enhancing system synchronization and security. Transitioning from Mechanical Engineering to CS, I specialize in AI and ML. Aspiring to innovate in Software Engineering as a Full-Stack Developer."
     },
 
