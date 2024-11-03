@@ -1,18 +1,28 @@
-// DataFetcher.js
-
 import React, { useState, useEffect } from 'react';
 import DataDisplay from './DataDisplay';
 import styles from './css/DataFetcher.module.css';
+import { OpenAI } from 'openai';
+
 
 export default function DataFetcher({ dbname }) {
   const [data, setData] = useState(null); 
-  const [loading, setLoading] = useState(false); // Loading state for data fetching
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const [customQuery, setCustomQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const [isExporting, setIsExporting] = useState(false); // New state for exporting
+  const [naturalLanguageQuery, setNaturalLanguageQuery] = useState(''); // New state for user input in natural language
+  const [isTranslating, setIsTranslating] = useState(false); // Track translation state
+
+
+  
+
+  const openai = new OpenAI({
+    apiKey: process.env.REACT_APP_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true
+  });
 
   const presetQueries = [
     {
@@ -26,17 +36,36 @@ export default function DataFetcher({ dbname }) {
     {
       label: 'Delete a Node',
       query: "MATCH (n {name: 'New Person'}) DELETE n",
-    },    
+    },
   ];
 
-  const handleSubmit = (e) => {
+  // Translate natural language query to Cypher
+  const translateQuery = async (naturalQuery) => {
+    try {
+      setIsTranslating(true);
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        prompt: `Convert the following natural language request into a Cypher query for a Neo4j database:\n\n"${naturalQuery}"`,
+        max_tokens: 100,
+      });
+      const generatedQuery = response.data.choices[0].text.trim();
+      setCustomQuery(generatedQuery);
+      setIsTranslating(false);
+      fetchData(generatedQuery); // Automatically fetch data with the translated query
+    } catch (error) {
+      console.error("Error translating query:", error);
+      setError(error);
+      setIsTranslating(false);
+    }
+  };
+
+  const handleNaturalQuerySubmit = (e) => {
     e.preventDefault();
-    if (!customQuery.trim()) {
+    if (!naturalLanguageQuery.trim()) {
       alert('Please enter a query.');
       return;
     }
-    setIsSubmitting(true);
-    fetchData(customQuery);
+    translateQuery(naturalLanguageQuery); // Translate natural language input
   };
 
   const handlePresetClick = (query) => {
@@ -49,6 +78,8 @@ export default function DataFetcher({ dbname }) {
     setIsSubmitting(false);
     fetchData(); // Fetch default data
   };
+
+    
 
   const fetchData = (query = null) => {
     setLoading(true);
@@ -70,8 +101,6 @@ export default function DataFetcher({ dbname }) {
 
     fetch(apiUrl, fetchOptions)
       .then((response) => {
-        console.log('Response status:', response.status);
-        console.log('Response status text:', response.statusText);
         if (!response.ok) {
           return response.json().then((errorData) => {
             throw new Error(
@@ -99,7 +128,7 @@ export default function DataFetcher({ dbname }) {
   }, [dbname]);
 
   const handleExport = () => {
-    setIsExporting(true); // Set exporting state to true
+    setIsExporting(true);
     setError(null);
 
     const apiUrl = `https://gjz0zq3tyd.execute-api.us-east-1.amazonaws.com/dev/neo4j/${dbname}?export=csv`;
@@ -112,33 +141,50 @@ export default function DataFetcher({ dbname }) {
           });
         }
         return response.text().then((csvData) => {
-          // Create a Blob from the CSV data
           const blob = new Blob([csvData], { type: 'text/csv' });
           const url = window.URL.createObjectURL(blob);
-          // Create a link to download the CSV file
           const link = document.createElement('a');
           link.href = url;
           link.setAttribute('download', 'graph_export.csv');
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          setIsExporting(false); // Set exporting state to false after download
+          setIsExporting(false);
         });
       })
       .catch((error) => {
         console.error('Error exporting data:', error);
         setError(error);
-        setIsExporting(false); // Set exporting state to false on error
+        setIsExporting(false);
       });
   };
+
+  
 
   return (
     <div className={styles.dataFetcherContainer}>
 
+      {/* Natural Language Query Form */}
+      <form onSubmit={handleNaturalQuerySubmit} className={styles.form}>
+        <label htmlFor="naturalQuery" className={styles.label}>
+          Enter Request in Natural Language:
+        </label>
+        <input
+          id="naturalQuery"
+          value={naturalLanguageQuery}
+          onChange={(e) => setNaturalLanguageQuery(e.target.value)}
+          placeholder="e.g., Show me 5 nodes"
+          className={styles.input}
+        />
+        <button type="submit" disabled={isTranslating} className={styles.button}>
+          {isTranslating ? 'Translating...' : 'Translate & Submit'}
+        </button>
+      </form>
+
       {/* Query Input Form */}
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={(e) => { e.preventDefault(); fetchData(customQuery); }} className={styles.form}>
         <label htmlFor="customQuery" className={styles.label}>
-          Enter Custom Query:
+          Enter Custom Cypher Query:
         </label>
         <textarea
           id="customQuery"
@@ -146,24 +192,17 @@ export default function DataFetcher({ dbname }) {
           onChange={(e) => setCustomQuery(e.target.value)}
           placeholder="e.g., MATCH (n) RETURN n LIMIT 5"
           className={styles.input}
-          rows={4} // Adjust the number of visible rows as needed
+          rows={4}
         />
-        <div className={styles.buttonContainer}>
-          <button type="submit" disabled={isSubmitting} className={styles.button}>
-            {isSubmitting ? 'Submitting...' : 'Submit'}
-          </button>
-          <button
-            type="button"
-            className={styles.exportButton}
-            onClick={handleExport}
-            disabled={isExporting} // Disable based on isExporting
-          >
-            {isExporting ? 'Exporting...' : 'Download CSV'}
-          </button>
-          <button type="button" onClick={handleReset} className={styles.resetButton}>
-            Reset to Default
-          </button>
-        </div>
+        <button type="submit" disabled={isSubmitting} className={styles.button}>
+          {isSubmitting ? 'Submitting...' : 'Submit'}
+        </button>
+        <button type="button" onClick={handleExport} disabled={isExporting} className={styles.exportButton}>
+          {isExporting ? 'Exporting...' : 'Download CSV'}
+        </button>
+        <button type="button" onClick={handleReset} className={styles.resetButton}>
+          Reset to Default
+        </button>
       </form>
 
       {/* Preset Query Buttons */}
