@@ -6,11 +6,13 @@ import styles from './css/DataFetcher.module.css';
 
 export default function DataFetcher({ dbname }) {
   const [data, setData] = useState(null); 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state for data fetching
   const [error, setError] = useState(null);
 
   const [customQuery, setCustomQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [isExporting, setIsExporting] = useState(false); // New state for exporting
 
   const presetQueries = [
     {
@@ -97,7 +99,7 @@ export default function DataFetcher({ dbname }) {
   }, [dbname]);
 
   const handleExport = () => {
-    setLoading(true);
+    setIsExporting(true); // Set exporting state to true
     setError(null);
 
     const apiUrl = `https://gjz0zq3tyd.execute-api.us-east-1.amazonaws.com/dev/neo4j/${dbname}?export=csv`;
@@ -110,7 +112,6 @@ export default function DataFetcher({ dbname }) {
           });
         }
         return response.text().then((csvData) => {
-          setLoading(false);
           // Create a Blob from the CSV data
           const blob = new Blob([csvData], { type: 'text/csv' });
           const url = window.URL.createObjectURL(blob);
@@ -121,12 +122,13 @@ export default function DataFetcher({ dbname }) {
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+          setIsExporting(false); // Set exporting state to false after download
         });
       })
       .catch((error) => {
         console.error('Error exporting data:', error);
         setError(error);
-        setLoading(false);
+        setIsExporting(false); // Set exporting state to false on error
       });
   };
 
@@ -154,9 +156,9 @@ export default function DataFetcher({ dbname }) {
             type="button"
             className={styles.exportButton}
             onClick={handleExport}
-            disabled={loading}
+            disabled={isExporting} // Disable based on isExporting
           >
-            {loading ? 'Exporting...' : 'Download CSV'}
+            {isExporting ? 'Exporting...' : 'Download CSV'}
           </button>
           <button type="button" onClick={handleReset} className={styles.resetButton}>
             Reset to Default
