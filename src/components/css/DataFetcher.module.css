@@ -6,15 +6,21 @@
 
 .form {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Align items to the top */
   justify-content: flex-start;
   margin-bottom: 20px;
   gap: 10px;
   flex-wrap: wrap;
 }
 
+.inputContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .label {
-  margin-right: 10px;
+  margin-bottom: 5px;
   font-weight: bold;
   color: #fff;
 }
@@ -26,6 +32,8 @@
   border: 2px solid #add8e6;
   border-radius: 5px;
   background-color: #f0f8ff;
+  resize: vertical; /* Allow vertical resizing if desired */
+  min-height: 200px; /* Adjust the minimum height as needed */
 }
 
 .input:focus {
@@ -36,13 +44,14 @@
 
 .buttonContainer {
   display: flex;
+  flex-direction: column; /* Stack buttons vertically */
   gap: 10px;
-  align-items: center;
 }
 
 .button {
   padding: 10px 20px;
   font-size: 16px;
+  width: 150px; /* Fixed width for consistency */
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -64,6 +73,7 @@
 .resetButton {
   padding: 10px 20px;
   font-size: 16px;
+  width: 150px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -75,6 +85,28 @@
 
 .resetButton:hover {
   background-color: #e0e0e0;
+}
+
+.exportButton {
+  padding: 10px 20px;
+  font-size: 16px;
+  width: 150px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+  background-color: #ffa500; /* Orange */
+  color: black;
+}
+
+.exportButton:hover {
+  background-color: #ff8c00; /* Darker orange */
+}
+
+.exportButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
 .presetContainer {
@@ -102,28 +134,13 @@
   background-color: #32cd32;
 }
 
-.exportButton {
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s;
-  background-color: #ffa500; /* Orange */
-  color: black;
-}
-
-.exportButton:hover {
-  background-color: #ff8c00; /* Darker orange */
-}
-
-.exportButton:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
 .errorMessage {
   color: red;
   font-weight: bold;
+}
+
+.selectedDb {
+  margin-bottom: 20px;
+  color: #fff;
+  font-size: 18px;
 }
