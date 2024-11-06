@@ -44,20 +44,35 @@ export default function DataFetcher({ dbname }) {
     try {
       setIsTranslating(true);
       const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        prompt: `Convert the following natural language request into a Cypher query for a Neo4j database:\n\n"${naturalQuery}"`,
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "user",
+            content: `Convert the following natural language request into a Cypher query for a Neo4j database:\n\n"${naturalQuery}"`
+          }
+        ],
         max_tokens: 100,
       });
-      const generatedQuery = response.data.choices[0].text.trim();
-      setCustomQuery(generatedQuery);
-      setIsTranslating(false);
-      fetchData(generatedQuery); // Automatically fetch data with the translated query
+
+      console.log("API Response:", response); 
+  
+      const generatedQuery = response.choices?.[0]?.message?.content?.trim();
+
+      
+      if (generatedQuery) {
+        setCustomQuery(generatedQuery);
+        fetchData(generatedQuery); // Automatically fetch data with the translated query
+      } else {
+        throw new Error("Failed to generate query.");
+      }
     } catch (error) {
       console.error("Error translating query:", error);
       setError(error);
+    } finally {
       setIsTranslating(false);
     }
   };
+  
 
   const handleNaturalQuerySubmit = (e) => {
     e.preventDefault();
