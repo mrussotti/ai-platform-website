@@ -30,7 +30,8 @@
   font-size: 16px;
   border: 2px solid #add8e6;
   border-radius: 5px;
-  background-color: #f0f8ff;
+  background-color: #f0f8ff; /* Light blue background */
+  color: black; /* Text color is now black */
   resize: vertical; /* Allow vertical resizing if desired */
   min-height: 50px; /* Adjust the minimum height as needed */
 }
@@ -38,7 +39,8 @@
 .input:focus {
   outline: none;
   border-color: #6495ed;
-  background-color: #e6f2ff;
+  background-color: #e6f2ff; /* Slightly darker background on focus */
+  color: black; /* Text remains black on focus */
 }
 
 .buttonContainer {

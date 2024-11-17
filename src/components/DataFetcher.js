@@ -3,6 +3,9 @@ import DataDisplay from './DataDisplay';
 import styles from './css/DataFetcher.module.css';
 import { OpenAI } from 'openai';
 
+// Use the Web Speech API
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
 export default function DataFetcher({ dbname }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -14,28 +17,31 @@ export default function DataFetcher({ dbname }) {
 
   const [naturalLanguageQuery, setNaturalLanguageQuery] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
+  const [isRecording, setIsRecording] = useState(false); // State to track recording status
 
-  // Hardcoded API key for demonstration purposes
+  let recognition = null;
+
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+  } else {
+    alert('Your browser does not support speech recognition.');
+  }
+
+  // Hardcoded OpenAI API key
   const openai = new OpenAI({
     apiKey: 'example-api-key-1234567890', // Replace with your actual API key
     dangerouslyAllowBrowser: true,
   });
 
   const presetQueries = [
-    {
-      label: 'Fetch 5 Nodes',
-      query: 'MATCH (n) RETURN n LIMIT 5',
-    },
-    {
-      label: 'Create a Node',
-      query: "CREATE (n:Person {name: 'New Person'}) RETURN n",
-    },
-    {
-      label: 'Delete a Node',
-      query: "MATCH (n {name: 'New Person'}) DELETE n",
-    },
+    { label: 'Fetch 5 Nodes', query: 'MATCH (n) RETURN n LIMIT 5' },
+    { label: 'Create a Node', query: "CREATE (n:Person {name: 'New Person'}) RETURN n" },
+    { label: 'Delete a Node', query: "MATCH (n {name: 'New Person'}) DELETE n" },
   ];
 
+  // Translate natural language query to Cypher using OpenAI
   const translateQuery = async (naturalQuery) => {
     try {
       setIsTranslating(true);
@@ -44,11 +50,11 @@ export default function DataFetcher({ dbname }) {
         prompt: `Convert the following natural language request into a Cypher query for a Neo4j database:\n\n"${naturalQuery}"`,
         max_tokens: 100,
       });
-      const generatedQuery = response.data.choices[0]?.text?.trim();
+      const generatedQuery = response.data.choices[0].text.trim();
 
       if (generatedQuery) {
         setCustomQuery(generatedQuery);
-        fetchData(generatedQuery);
+        fetchData(generatedQuery); // Automatically fetch data with the translated query
       } else {
         throw new Error('Failed to generate query.');
       }
@@ -57,6 +63,33 @@ export default function DataFetcher({ dbname }) {
       setError(error);
     } finally {
       setIsTranslating(false);
+    }
+  };
+
+  // Handle voice recording start/stop
+  const handleVoiceInput = () => {
+    if (!recognition) return;
+
+    if (!isRecording) {
+      // Start recording
+      setIsRecording(true);
+      recognition.start();
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log('Voice Input:', transcript);
+        setNaturalLanguageQuery(transcript); // Populate the input field with the transcribed text
+      };
+
+      recognition.onerror = (err) => {
+        console.error('Speech Recognition Error:', err);
+        alert('Error recognizing speech. Please try again.');
+        setIsRecording(false);
+      };
+    } else {
+      // Stop recording
+      setIsRecording(false);
+      recognition.stop();
     }
   };
 
@@ -85,18 +118,13 @@ export default function DataFetcher({ dbname }) {
     setError(null);
 
     const apiUrl = `https://gjz0zq3tyd.execute-api.us-east-1.amazonaws.com/dev/neo4j/${dbname}`;
-
     const fetchOptions = query
       ? {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query }),
         }
-      : {
-          method: 'GET',
-        };
+      : { method: 'GET' };
 
     fetch(apiUrl, fetchOptions)
       .then((response) => {
@@ -160,6 +188,14 @@ export default function DataFetcher({ dbname }) {
 
   return (
     <div className={styles.dataFetcherContainer}>
+      {/* Mic Button for Voice-to-Text */}
+      <div className={styles.form}>
+        <button onClick={handleVoiceInput} className={styles.voiceButton}>
+          {isRecording ? '🛑 Stop Recording' : '🎤 Start Recording'}
+        </button>
+      </div>
+
+      {/* Natural Language Query Form */}
       <form onSubmit={handleNaturalQuerySubmit} className={styles.form}>
         <label htmlFor="naturalQuery" className={styles.label}>
           Enter Request in Natural Language:
@@ -176,6 +212,7 @@ export default function DataFetcher({ dbname }) {
         </button>
       </form>
 
+      {/* Query Input Form */}
       <form onSubmit={(e) => { e.preventDefault(); fetchData(customQuery); }} className={styles.form}>
         <label htmlFor="customQuery" className={styles.label}>
           Enter Custom Cypher Query:
@@ -199,6 +236,7 @@ export default function DataFetcher({ dbname }) {
         </button>
       </form>
 
+      {/* Preset Query Buttons */}
       <div className={styles.presetContainer}>
         {presetQueries.map((preset, index) => (
           <button
@@ -212,6 +250,7 @@ export default function DataFetcher({ dbname }) {
         ))}
       </div>
 
+      {/* Display Results */}
       {loading ? (
         <p>Loading data from {dbname}...</p>
       ) : error ? (
@@ -220,5 +259,5 @@ export default function DataFetcher({ dbname }) {
         <DataDisplay data={data} />
       )}
     </div>
-  );
-}
+   );
+  }
