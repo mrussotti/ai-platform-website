@@ -3,9 +3,8 @@ import DataDisplay from './DataDisplay';
 import styles from './css/DataFetcher.module.css';
 import { OpenAI } from 'openai';
 
-
 export default function DataFetcher({ dbname }) {
-  const [data, setData] = useState(null); 
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -13,15 +12,13 @@ export default function DataFetcher({ dbname }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  const [naturalLanguageQuery, setNaturalLanguageQuery] = useState(''); // New state for user input in natural language
-  const [isTranslating, setIsTranslating] = useState(false); // Track translation state
+  const [naturalLanguageQuery, setNaturalLanguageQuery] = useState('');
+  const [isTranslating, setIsTranslating] = useState(false);
 
-
-  
-
+  // Hardcoded API key for demonstration purposes
   const openai = new OpenAI({
-    apiKey: process.env.REACT_APP_OPENAI_API_KEY,
-    dangerouslyAllowBrowser: true
+    apiKey: 'example-api-key-1234567890', // Replace with your actual API key
+    dangerouslyAllowBrowser: true,
   });
 
   const presetQueries = [
@@ -39,40 +36,29 @@ export default function DataFetcher({ dbname }) {
     },
   ];
 
-  // Translate natural language query to Cypher
   const translateQuery = async (naturalQuery) => {
     try {
       setIsTranslating(true);
       const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "user",
-            content: `Convert the following natural language request into a Cypher query for a Neo4j database:\n\n"${naturalQuery}"`
-          }
-        ],
+        model: 'gpt-4o-mini',
+        prompt: `Convert the following natural language request into a Cypher query for a Neo4j database:\n\n"${naturalQuery}"`,
         max_tokens: 100,
       });
+      const generatedQuery = response.data.choices[0]?.text?.trim();
 
-      console.log("API Response:", response); 
-  
-      const generatedQuery = response.choices?.[0]?.message?.content?.trim();
-
-      
       if (generatedQuery) {
         setCustomQuery(generatedQuery);
-        fetchData(generatedQuery); // Automatically fetch data with the translated query
+        fetchData(generatedQuery);
       } else {
-        throw new Error("Failed to generate query.");
+        throw new Error('Failed to generate query.');
       }
     } catch (error) {
-      console.error("Error translating query:", error);
+      console.error('Error translating query:', error);
       setError(error);
     } finally {
       setIsTranslating(false);
     }
   };
-  
 
   const handleNaturalQuerySubmit = (e) => {
     e.preventDefault();
@@ -80,21 +66,19 @@ export default function DataFetcher({ dbname }) {
       alert('Please enter a query.');
       return;
     }
-    translateQuery(naturalLanguageQuery); // Translate natural language input
+    translateQuery(naturalLanguageQuery);
   };
 
   const handlePresetClick = (query) => {
     setCustomQuery(query);
-    setError(null); 
+    setError(null);
   };
 
   const handleReset = () => {
     setCustomQuery('');
     setIsSubmitting(false);
-    fetchData(); // Fetch default data
+    fetchData();
   };
-
-    
 
   const fetchData = (query = null) => {
     setLoading(true);
@@ -174,12 +158,8 @@ export default function DataFetcher({ dbname }) {
       });
   };
 
-  
-
   return (
     <div className={styles.dataFetcherContainer}>
-
-      {/* Natural Language Query Form */}
       <form onSubmit={handleNaturalQuerySubmit} className={styles.form}>
         <label htmlFor="naturalQuery" className={styles.label}>
           Enter Request in Natural Language:
@@ -196,7 +176,6 @@ export default function DataFetcher({ dbname }) {
         </button>
       </form>
 
-      {/* Query Input Form */}
       <form onSubmit={(e) => { e.preventDefault(); fetchData(customQuery); }} className={styles.form}>
         <label htmlFor="customQuery" className={styles.label}>
           Enter Custom Cypher Query:
@@ -220,7 +199,6 @@ export default function DataFetcher({ dbname }) {
         </button>
       </form>
 
-      {/* Preset Query Buttons */}
       <div className={styles.presetContainer}>
         {presetQueries.map((preset, index) => (
           <button
@@ -234,7 +212,6 @@ export default function DataFetcher({ dbname }) {
         ))}
       </div>
 
-      {/* Display Loading, Error, or Data */}
       {loading ? (
         <p>Loading data from {dbname}...</p>
       ) : error ? (
