@@ -15,15 +15,6 @@
     },
     "s3Key": {
       "Type": "String"
-    },
-    "neo4JUri": {
-      "Type": "String"
-    },
-    "neo4JUsername": {
-      "Type": "String"
-    },
-    "neo4JPassword": {
-      "Type": "String"
     }
   },
   "Conditions": {
@@ -56,12 +47,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "neo4jFunction",
+            "aiplatformwebsite70aa5971",
             {
               "Fn::Join": [
                 "",
                 [
-                  "neo4jFunction",
+                  "aiplatformwebsite70aa5971",
                   "-",
                   {
                     "Ref": "env"
@@ -78,15 +69,6 @@
             },
             "REGION": {
               "Ref": "AWS::Region"
-            },
-            "NEO4J_URI": {
-              "Ref": "neo4JUri"
-            },
-            "NEO4J_USERNAME": {
-              "Ref": "neo4JUsername"
-            },
-            "NEO4J_PASSWORD": {
-              "Ref": "neo4JPassword"
             }
           }
         },
@@ -96,7 +78,7 @@
             "Arn"
           ]
         },
-        "Runtime": "python3.8",
+        "Runtime": "python3.12",
         "Layers": [],
         "Timeout": 25
       }
@@ -107,12 +89,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "aiplatformLambdaRole12a99449",
+            "aiplatformwebsiteLambdaRoled2676099",
             {
               "Fn::Join": [
                 "",
                 [
-                  "aiplatformLambdaRole12a99449",
+                  "aiplatformwebsiteLambdaRoled2676099",
                   "-",
                   {
                     "Ref": "env"
