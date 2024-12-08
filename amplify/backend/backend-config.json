@@ -1,66 +1,25 @@
 {
-  "api": {
-    "neo4jApi": {
-      "dependsOn": [
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "neo4jFunction"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "API Gateway"
-    }
-  },
   "function": {
-    "neo4jFunction": {
+    "aiplatformwebsite70aa5971": {
       "build": true,
-      "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     }
   },
   "parameters": {
-    "AMPLIFY_function_neo4jFunction_deploymentBucketName": {
+    "AMPLIFY_function_aiplatformwebsite70aa5971_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "neo4jFunction"
+          "resourceName": "aiplatformwebsite70aa5971"
         }
       ]
     },
-    "AMPLIFY_function_neo4jFunction_neo4JPassword": {
+    "AMPLIFY_function_aiplatformwebsite70aa5971_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "neo4jFunction"
-        }
-      ]
-    },
-    "AMPLIFY_function_neo4jFunction_neo4JUri": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "neo4jFunction"
-        }
-      ]
-    },
-    "AMPLIFY_function_neo4jFunction_neo4JUsername": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "neo4jFunction"
-        }
-      ]
-    },
-    "AMPLIFY_function_neo4jFunction_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "neo4jFunction"
+          "resourceName": "aiplatformwebsite70aa5971"
         }
       ]
     }
