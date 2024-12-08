@@ -8,7 +8,7 @@ import sys
 import traceback
 from neo4j import GraphDatabase
 from neo4j.exceptions import Neo4jError
-from neo4j.graph import Node, Relationship
+from neo4j.graph import Node, Relationship, Path
 from neo4j.time import DateTime, Date
 
 def serialize_value(value):
@@ -199,9 +199,19 @@ def handle_custom_query(driver, event):
         with driver.session() as session:
             print(f'Executing custom query: {query}')
             result = session.run(query)
+            print("Result: ", result)
             records = []
             for record in result:
-                record_data = {key: serialize_value(value) for key, value in record.items()}
+                print("Record: ", record)
+                record_data = {}
+                for key, value in record.items():
+                    if isinstance(value, Path):
+                        record_data[key] = {
+                            'nodes': [serialize_value(node) for node in value.nodes],
+                            'relationships': [serialize_value(rel) for rel in value.relationships],
+                        }
+                    else:
+                        record_data[key] = serialize_value(value)
                 records.append(record_data)
             # Handle cases where no records are returned
             if not records:
