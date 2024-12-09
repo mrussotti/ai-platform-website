@@ -50,6 +50,17 @@ export default function DataFetcher({ dbname }) {
     fetchData(); // Fetch default data
   };
 
+  const handleGraphVisualisation = () => {
+    if (!customQuery){
+      alert('Please enter a query.');
+      return;
+    }
+    const graphUrl = new URL('viewgraph.html',window.location.origin);
+    graphUrl.searchParams.append('dbname', dbname);
+    graphUrl.searchParams.append('query', customQuery);
+    window.open(graphUrl.toString(), '_blank', 'width=800,height=600');
+  }
+
   const fetchData = (query = null) => {
     setLoading(true);
     setError(null);
@@ -94,9 +105,9 @@ export default function DataFetcher({ dbname }) {
       });
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [dbname]);
+  // useEffect(() => {
+  //   fetchData();
+  // }, [dbname]);
 
   const handleExport = () => {
     setIsExporting(true); // Set exporting state to true
@@ -162,6 +173,9 @@ export default function DataFetcher({ dbname }) {
           </button>
           <button type="button" onClick={handleReset} className={styles.resetButton}>
             Reset to Default
+          </button>
+          <button type="button" onClick={handleGraphVisualisation} className={styles.visualiseGraphButton}>
+            Visualize Graph
           </button>
         </div>
       </form>
