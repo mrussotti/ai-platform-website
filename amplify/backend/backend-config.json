@@ -1,4 +1,20 @@
 {
+  "api": {
+    "aiPlatformApiDev": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "aiplatformwebsite70aa5971"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    }
+  },
   "function": {
     "aiplatformwebsite70aa5971": {
       "build": true,

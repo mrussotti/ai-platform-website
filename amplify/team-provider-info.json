@@ -50,6 +50,9 @@
           "appId": "d3ubh85diyi0no",
           "type": "cicd"
         }
+      },
+      "api": {
+        "aiPlatformApiDev": {}
       }
     }
   }
