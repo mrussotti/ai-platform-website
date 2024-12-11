@@ -61,9 +61,9 @@ def lambda_handler(event, context):
     path_parts = path.strip('/').split('/')
     if len(path_parts) >= 2 and path_parts[0] == 'neo4j':
         dbname = path_parts[1]
-        uri_env = f'NEO4J_URI'
-        username_env = f'NEO4J_USERNAME'
-        password_env = f'NEO4J_PASSWORD'
+        uri_env = f'NEO4J_URI_{dbname}'
+        username_env = f'NEO4J_USERNAME_{dbname}'
+        password_env = f'NEO4J_PASSWORD_{dbname}'
 
         NEO4J_URI = os.environ.get(uri_env)
         NEO4J_USERNAME = os.environ.get(username_env)
