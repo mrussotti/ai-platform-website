@@ -3,7 +3,12 @@
   "aws_cloud_logic_custom": [
     {
       "name": "aiPlatformApiDev",
-      "endpoint": "https://hbifv7x5k1.execute-api.us-east-1.amazonaws.com/dev",
+      "endpoint": "https://axlo5ijp56.execute-api.us-east-1.amazonaws.com/prod",
+      "region": "us-east-1"
+    },
+    {
+      "name": "aiPlatformApiProd",
+      "endpoint": "https://ay0khn1qt8.execute-api.us-east-1.amazonaws.com/prod",
       "region": "us-east-1"
     }
   ]
