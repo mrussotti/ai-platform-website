@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { API } from 'aws-amplify';
+import { API } from 'aws-amplify'; // Import from 'aws-amplify', not '@aws-amplify/api'
 import DataDisplay from './DataDisplay';
 import styles from './css/DataFetcher.module.css';
 
-// This component fetches data from the configured Amplify API endpoint.
-// `dbname` is the database name you pass as a prop and will be appended to the path.
+const apiName = 'aiplatformapi'; // Make sure this matches your aws-exports.js
 
 export default function DataFetcher({ dbname }) {
   const [data, setData] = useState(null); 
@@ -15,13 +14,6 @@ export default function DataFetcher({ dbname }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  // The API name is found in aws-exports.js `aws_cloud_logic_custom` array.
-  // For example, if aws-exports.js has:
-  // "aws_cloud_logic_custom": [
-  //   { "name": "aiplatformapi", "endpoint": "https://xxxx.execute-api.us-east-1.amazonaws.com/dev" }
-  // ]
-  // then use "aiplatformapi" here.
-  const apiName = 'aiplatformapi'; 
   const path = `/neo4j/${dbname}`;
 
   const presetQueries = [
@@ -52,57 +44,54 @@ export default function DataFetcher({ dbname }) {
   };
 
   const handleGraphVisualisation = () => {
-    if (!customQuery){
+    if (!customQuery) {
       alert('Please enter a query.');
       return;
     }
-    const graphUrl = new URL('viewgraph.html',window.location.origin);
+    const graphUrl = new URL('viewgraph.html', window.location.origin);
     graphUrl.searchParams.append('dbname', dbname);
     graphUrl.searchParams.append('query', customQuery);
     window.open(graphUrl.toString(), '_blank', 'width=800,height=600');
-  }
+  };
 
-  const fetchData = (query = null) => {
+  const fetchData = async (query = null) => {
     setLoading(true);
     setError(null);
     try {
       let responseData;
       if (query) {
-        // POST request for custom query
         responseData = await API.post(apiName, path, {
           body: { query },
           headers: { 'Content-Type': 'application/json' },
         });
       } else {
-        // GET request for default data
         responseData = await API.get(apiName, path, {});
       }
       setData(responseData);
+      setIsSubmitting(false);
     } catch (err) {
       console.error('Error fetching data:', err);
       setError(err);
     } finally {
       setLoading(false);
-      setIsSubmitting(false);
     }
   };
-
-  // useEffect(() => {
-  //   fetchData();
-  // }, [dbname]);
 
   const handleExport = async () => {
     setIsExporting(true);
     setError(null);
 
     try {
-      // Get the endpoint from aws-exports.js (already configured by Amplify)
-      // and build the CSV export URL with `?export=csv`.
-      const { aws_cloud_logic_custom } = (await import('../aws-exports')); // adjust path as needed
-      const endpointInfo = aws_cloud_logic_custom.find(api => api.name === apiName);
-      const exportUrl = `${endpointInfo.endpoint}${path}?export=csv`;
+      const { default: awsconfig } = await import('../aws-exports');
+      const endpointInfo = awsconfig.aws_cloud_logic_custom.find(api => api.name === apiName);
 
+      if (!endpointInfo) {
+        throw new Error('API endpoint not found in aws-exports.js');
+      }
+
+      const exportUrl = `${endpointInfo.endpoint}${path}?export=csv`;
       const response = await fetch(exportUrl);
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Error exporting data: ${response.status} - ${errorText}`);
@@ -128,7 +117,9 @@ export default function DataFetcher({ dbname }) {
   return (
     <div className={styles.dataFetcherContainer}>
       <form onSubmit={handleSubmit} className={styles.form}>
-        <label htmlFor="customQuery" className={styles.label}>Enter Custom Query:</label>
+        <label htmlFor="customQuery" className={styles.label}>
+          Enter Custom Query:
+        </label>
         <textarea
           id="customQuery"
           value={customQuery}
