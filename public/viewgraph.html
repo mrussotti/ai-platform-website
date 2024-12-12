@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .container {
+            display: flex;
+        }
+        svg {
+            border: 1px solid black;
+        }
+        .sidebar {
+            width: 350px;
+            margin-left: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-wrap: break-word; /* Ensures text wraps within the container */
+            overflow-y: auto;          /* Allows scrolling if content is still long */
+            max-height: 700px;         /* Matches the SVG height for consistency */
+        }
+    </style>
+</head>
+<body>
+    <h1>Graph Visualization</h1>
+    <div class="container">
+        <!-- Graph SVG -->
+        <svg width="1000" height="700"></svg>
+        
+        <!-- Sidebar for Node Information -->
+        <div class="sidebar">
+            <h2>Node Information</h2>
+            <p id="node-info">Click on a node to see details here.</p>
+        </div>
+    </div>
+    <script>
+        const urlparams = new URLSearchParams(window.location.search);
+        const cypherQuery = urlparams.get('query');
+        const dbname = urlparams.get('dbname');
+
+        const data=null;
+        const err=null;
+
+        const colorMapping = {}; // To store label-color mapping dynamically
+        const usedColors = new Set(); // To keep track of used colors
+
+        // Function to generate random light colors
+        function generateLightColor() {
+            let color;
+            do {
+                color = `hsl(${Math.floor(Math.random() * 360)}, 70%, 80%)`; // Light colors using HSL
+            } while (usedColors.has(color)); // Ensure no duplicate colors
+            usedColors.add(color);
+            return color;
+        }
+
+        // Assign colors dynamically during node creation
+        function assignColorToLabel(label) {
+            if (!colorMapping[label]) {
+                colorMapping[label] = generateLightColor();
+            }
+            return colorMapping[label];
+        }
+
+
+
+        // const colorMapping = {
+        //     "Customer": "#1f77b4",  // Blue
+        //     "Employee": "#ff7f0e",  // Orange
+        //     "Order": "#2ca02c",     // Green
+        //     "Product": "#d62728",   // Red
+        //     "Region": "#9467bd",    // Purple
+        //     "Shipper": "#8c564b",   // Brown
+        //     "Supplier": "#e377c2",   // Pink
+        //     "Territory": "#7f7f7f"   // Gray
+        // };
+
+        async function fetchGraphData(query) {
+            // const apiUrl = `https://gjz0zq3tyd.execute-api.us-east-1.amazonaws.com/dev/neo4j/${dbname}`;
+            const apiUrl = `https://gjz0zq3tyd.execute-api.us-east-1.amazonaws.com/dev/neo4j/${dbname}`;
+
+            const fetchOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query }),
+                };
+            
+            fetch(apiUrl, fetchOptions)
+            .then((response) => {
+                console.log('Response status:', response.status);
+                console.log('Response status text:', response.statusText);
+                if (!response.ok) {
+                return response.json().then((errorData) => {
+                    throw new Error(
+                    `Network response was not ok: ${response.status} - ${errorData.error || response.statusText}`
+                    );
+                });
+                }
+                console.log(response)
+                return response.json();
+            })
+            .then((data) => {
+                if (!data[0]){
+                    const container = document.querySelector('.sidebar'); // Assuming '.container' is the parent div
+                    const errorDiv = document.createElement('div');
+                    errorDiv.innerHTML = `
+                        <h1>Error in fetching data</h1>
+                        <p>Data for this query doesn't exist in this database</p>
+                    `;
+                    container.appendChild(errorDiv);
+                    return
+                }
+                visualizeGraph(data);
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+                const container = document.querySelector('.sidebar'); // Assuming '.container' is the parent div
+                const errorDiv = document.createElement('div');
+                errorDiv.innerHTML = `
+                    <h1>Error in fetching data</h1>
+                    <p>${error.message}</p>
+                `;
+                container.appendChild(errorDiv);
+            });
+
+        }
+
+
+        function visualizeGraph(graphData){
+            // console.log("Graph Data is: ",graphData)
+            var svg = d3.select('svg')
+            var width = svg.attr('width')
+            var height = svg.attr('height')
+                        // Set up a group for zooming
+            const g = svg.append("g");
+
+            // Add zoom behavior
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 4]) // Set min and max zoom scale
+                .on("zoom", (event) => {
+                    g.attr("transform", event.transform);
+                });
+
+            svg.call(zoom);
+            // if graphdata is undefined
+            // if (graphData[0]===undefined){
+            //     console.log("Graph Data is undefined")
+            //     return
+            // }
+
+            var node2=graphData[0].n
+            var path2=graphData[0].p
+            // console.log("graphData[0] is",graphData[0])
+            // console.log("node2 is",node2)
+            var graph={nodes:[],links:[]}
+            // console.log("inside graphData")
+            // console.log(graphData)
+            // console.log(node2)
+            const nodesInGraph = [];
+            const linksInGraph = [];
+            const nodeIds = new Set(); // To keep track of unique node ids
+            if (node2 && !path2){
+                // console.log("Asking for nodes only")
+                graphData.forEach(record=>{
+                    const node=record.n;
+                    // console.log("record is", record);
+                    if (!nodeIds.has(node.id)) {
+                        // console.log("lol")
+                        // console.log(startNode.identity.low)
+                        nodesInGraph.push({
+                            id: node.id,
+                            labels: node.labels,
+                            properties: node.properties
+                        });
+                        nodeIds.add(node.id);
+                    }
+                })
+                graph.nodes=nodesInGraph;
+            }
+            else if (path2){
+                // console.log("It has path")
+                graphData.forEach(record => {
+                    const path = record.p
+                    // console.log("record is", record);
+                    // console.log("path is",path)
+                    const startNode = path.nodes[0];
+                    const endNode = path.nodes[1];
+                    // console.log(path,startNode,endNode)
+                    // console.log(path)
+                    // console.log(startNode.identity.low)
+                    // console.log("record is", record);
+                    if (!nodeIds.has(startNode.id)) {
+                        // console.log("lol")
+                        // console.log(startNode.identity.low)
+                        // nodesInGraph.push({
+                        //     id: startNode.identity.low,
+                        //     labels: startNode.labels,
+                        //     properties: startNode.properties
+                        // });
+                        nodesInGraph.push(startNode);
+                        nodeIds.add(startNode.id);
+                    }
+                    
+                    if (!nodeIds.has(endNode.id)) {
+                        // nodesInGraph.push({
+                        //     id: endNode.identity.low,
+                        //     labels: endNode.labels,
+                        //     properties: endNode.properties
+                        // });
+                        nodesInGraph.push(endNode);
+                        nodeIds.add(endNode.id);
+                    }
+                    // console.log("helloooo worldd")
+                    // console.log("NodeIds now: ")
+                    // console.log(nodeIds)
+                    // const startNodeRef = nodes.find(n => n.id === startNode.identity.low);
+                    // const endNodeRef = nodes.find(n => n.id === endNode.identity.low);
+                    // console.log("realtionships is ", path.relationships);
+                    linksInGraph.push({
+                        source: startNode.id,
+                        target: endNode.id,
+                        type: path.relationships[0].type
+                    });
+                    // links.push({
+                    //     source: startNodeRef,
+                    //     target: endNodeRef,
+                    //     type: path.segments.length > 0 ? path.segments[0].relationship.type : null
+                    // });
+                });
+                
+                graph.nodes=nodesInGraph;
+                graph.links=linksInGraph;
+            }
+            console.log("heyoooo trying.... below you'll see the graph")
+            console.log(graph)
+
+            // var simulation = d3.forceSimulation(graph.nodes)
+            //                 .force("link",d3.forceLink(graph.links).id(function(d){
+            //                         return d.id
+            //                     })
+            //                     .distance(100)
+            //                     .links(graph.links)
+            //                 )
+            //                 .force('charge', d3.forceManyBody().strength(-40))
+            //                 .force('center', d3.forceCenter(width / 2, height / 2))
+            //                 .on("tick",ticked)
+
+            var simulation = d3.forceSimulation(graph.nodes)
+                            .force("link", d3.forceLink(graph.links)
+                                .id(d => d.id)
+                                .distance(100)
+                                .links(graph.links)
+                            )
+                            .force('charge', d3.forceManyBody()
+                                .strength(-150)
+                                .distanceMax(500)  // Limit repulsion range to avoid affecting distant clusters
+                            )
+                            .force('center', d3.forceCenter(width / 2, height / 2))
+                            .on("tick", ticked);
+
+            var link = g.append('g')
+            .selectAll('line')
+            .data(graph.links)
+            .enter().append('line')
+            .attr('stroke-width',function(d){
+                return 2
+            })
+            .attr('stroke', 'black');
+
+            var node = g.append('g')
+                .selectAll('circle')
+                .data(graph.nodes)
+                .enter().append('circle')
+                .attr('r', 30)
+                .attr('fill', d => {
+                    // Assign color based on the first label (or any specific logic)
+                    return assignColorToLabel(d.labels[0]) || '#CF9FFF'; // Default color set to light violet
+                })
+                .attr("stroke","yellow")
+                .on("click", showNodeInfo)
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended)
+                );
+
+            var labels = g.append('g')
+            .selectAll('text')
+            .data(graph.nodes)
+            .enter().append('text')
+            .attr('text-anchor', 'middle') // Center the text within the node
+            .attr('dy', '.35em') // Adjusts text vertically to be centered in the circle
+            // .text(d => truncateText(d.labels[0], 40)); // Assumes the label is in the first position of the labels array\
+            .text(d => [truncateText(d.labels[0], 40),truncateText(`ID: ${d.id}`, 40)]);
+            
+
+            function showNodeInfo(event, d) {
+                const infoContainer = document.getElementById('node-info');
+                infoContainer.innerHTML = `
+                    <strong>ID:</strong> ${d.id}<br>
+                    <strong>Label:</strong> ${d.labels.join(', ')}<br>
+                    <strong>Properties:</strong> <pre>${JSON.stringify(d.properties, null, 2)}</pre>
+                `;
+            }
+
+            function truncateText(text, maxWidth) {
+                // Create a temporary text element to measure the width
+                var tempText = svg.append("text")
+                    .attr("font-size", 12)
+                    .text(text);
+
+                let truncatedText = text;
+                while (tempText.node().getBBox().width > maxWidth && truncatedText.length > 0) {
+                    truncatedText = truncatedText.slice(0, -1); // Remove one character at a time
+                    tempText.text(truncatedText + "...");
+                }
+                tempText.remove(); // Remove the temporary element
+
+                return truncatedText.length < text.length ? truncatedText + "..." : truncatedText;
+            }
+
+            function ticked(){
+                link
+                    .attr("x1",function(d){
+                        return d.source.x;
+                    })
+                    .attr("y1",function(d){
+                        return d.source.y;
+                    })
+                    .attr("x2",function(d){
+                        return d.target.x;
+                    })
+                    .attr("y2",function(d){
+                        return d.target.y;
+                    })
+
+                node
+                    .attr("cx",function(d){
+                        return d.x;
+                    })
+                    .attr("cy",function(d){
+                        return d.y;
+                    })
+                labels
+                    .attr("x", function(d) { return d.x; })
+                    .attr("y", function(d) { return d.y; });
+            }
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+        fetchGraphData(cypherQuery);
+        
+    </script>
+</body>
+</html>
