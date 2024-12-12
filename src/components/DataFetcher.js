@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { API } from 'aws-amplify'; // Import from 'aws-amplify', not '@aws-amplify/api'
+import { API } from 'aws-amplify'; 
 import DataDisplay from './DataDisplay';
 import styles from './css/DataFetcher.module.css';
 
-const apiName = 'aiplatformapi'; // Make sure this matches your aws-exports.js
+const apiName = 'aiPlatformApiDev'; // change to aiPlatformApiProd for main branch
 
 export default function DataFetcher({ dbname }) {
   const [data, setData] = useState(null); 
