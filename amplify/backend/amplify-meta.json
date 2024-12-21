@@ -30,7 +30,7 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-prod-39c09-deployment/amplify-cfn-templates/api/aiPlatformApiDev-cloudformation-template.json",
         "logicalId": "apiaiPlatformApiDev"
       },
-      "lastPushTimeStamp": "2024-12-12T21:39:14.897Z",
+      "lastPushTimeStamp": "2024-12-11T14:48:48.852Z",
       "output": {
         "ApiName": "aiPlatformApiDev",
         "RootUrl": "https://axlo5ijp56.execute-api.us-east-1.amazonaws.com/prod",
@@ -55,7 +55,7 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-prod-39c09-deployment/amplify-cfn-templates/api/aiPlatformApiProd-cloudformation-template.json",
         "logicalId": "apiaiPlatformApiProd"
       },
-      "lastPushTimeStamp": "2024-12-12T21:39:14.931Z",
+      "lastPushTimeStamp": "2024-12-11T14:48:48.852Z",
       "output": {
         "ApiName": "aiPlatformApiProd",
         "RootUrl": "https://ay0khn1qt8.execute-api.us-east-1.amazonaws.com/prod",
@@ -76,20 +76,20 @@
         "Name": "aiplatformwebsite70aa5971-prod",
         "LambdaExecutionRole": "aiplatformwebsiteLambdaRoled2676099-prod"
       },
-      "lastPushTimeStamp": "2024-12-12T21:39:15.213Z",
+      "lastPushTimeStamp": "2024-12-11T14:48:48.852Z",
       "providerMetadata": {
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-prod-39c09-deployment/amplify-cfn-templates/function/aiplatformwebsite70aa5971-cloudformation-template.json",
         "logicalId": "functionaiplatformwebsite70aa5971"
       },
-      "lastBuildTimeStamp": "2024-12-12T21:38:00.973Z",
+      "lastBuildTimeStamp": "2024-12-11T14:47:43.761Z",
       "lastBuildType": "PROD",
-      "lastPackageTimeStamp": "2024-12-12T21:38:10.172Z",
-      "distZipFilename": "aiplatformwebsite70aa5971-44306a3374656c575745-build.zip",
+      "lastPackageTimeStamp": "2024-12-11T14:47:46.254Z",
+      "distZipFilename": "aiplatformwebsite70aa5971-48623034794c55704b71-build.zip",
       "s3Bucket": {
         "deploymentBucketName": "amplify-aiplatformwebsite-prod-39c09-deployment",
-        "s3Key": "amplify-builds/aiplatformwebsite70aa5971-44306a3374656c575745-build.zip"
+        "s3Key": "amplify-builds/aiplatformwebsite70aa5971-48623034794c55704b71-build.zip"
       },
-      "lastPushDirHash": "D0j3telWWEAI6RH+ebkpAM/Erp0="
+      "lastPushDirHash": "Hb04yLUpKql9Yc4sMdZ7nLI2jSc="
     }
   },
   "hosting": {
