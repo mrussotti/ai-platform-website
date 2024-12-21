@@ -32,6 +32,7 @@
   "function": {
     "aiplatformwebsite70aa5971": {
       "build": true,
+      "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     }
