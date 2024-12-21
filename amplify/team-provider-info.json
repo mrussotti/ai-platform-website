@@ -15,7 +15,7 @@
       "function": {
         "aiplatformwebsite70aa5971": {
           "deploymentBucketName": "amplify-aiplatformwebsite-prod-39c09-deployment",
-          "s3Key": "amplify-builds/aiplatformwebsite70aa5971-50666b2b766236512b47-build.zip"
+          "s3Key": "amplify-builds/aiplatformwebsite70aa5971-5a775a6c32756f6c6359-build.zip"
         }
       },
       "hosting": {
