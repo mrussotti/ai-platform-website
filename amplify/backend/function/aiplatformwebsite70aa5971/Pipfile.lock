@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ae52f2e7474b81e5603de64f0a9eb588788491ddb82775a2a5042d61a7033eba"
+            "sha256": "702ad05de9bc9de99a4807c8dde1686f31e0041d7b5f6f6b74861195a52110f5"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -15,23 +15,6 @@
             }
         ]
     },
-    "default": {
-        "neo4j": {
-            "hashes": [
-                "sha256:929c14b9e5341267324eca170b39d1798b032bffacc26a0529eacaf678ae483f",
-                "sha256:f82ee807cd15b178898d83f41a66372e11719a25dd487fd7bea48fd4b7323765"
-            ],
-            "index": "pypi",
-            "markers": "python_version >= '3.7'",
-            "version": "==5.27.0"
-        },
-        "pytz": {
-            "hashes": [
-                "sha256:2aa355083c50a0f93fa581709deac0c9ad65cca8a9e9beac660adcbd493c798a",
-                "sha256:31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725"
-            ],
-            "version": "==2024.2"
-        }
-    },
+    "default": {},
     "develop": {}
 }
