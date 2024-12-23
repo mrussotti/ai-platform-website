@@ -31,7 +31,7 @@
         "RootUrl": "https://hbifv7x5k1.execute-api.us-east-1.amazonaws.com/dev",
         "ApiId": "hbifv7x5k1"
       },
-      "lastPushTimeStamp": "2024-12-23T14:10:05.285Z",
+      "lastPushTimeStamp": "2024-12-23T14:32:23.923Z",
       "providerMetadata": {
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-dev-e6691-deployment/amplify-cfn-templates/api/aiPlatformApiDev-cloudformation-template.json",
         "logicalId": "apiaiPlatformApiDev"
@@ -55,7 +55,7 @@
         "RootUrl": "https://6ms2szj023.execute-api.us-east-1.amazonaws.com/dev",
         "ApiId": "6ms2szj023"
       },
-      "lastPushTimeStamp": "2024-12-23T14:10:05.311Z",
+      "lastPushTimeStamp": "2024-12-23T14:32:23.949Z",
       "providerMetadata": {
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-dev-e6691-deployment/amplify-cfn-templates/api/aiPlatformApiProd-cloudformation-template.json",
         "logicalId": "apiaiPlatformApiProd"
@@ -75,15 +75,20 @@
         "Name": "aiplatformwebsite70aa5971-dev",
         "LambdaExecutionRole": "aiplatformwebsiteLambdaRoled2676099-dev"
       },
-      "lastPushTimeStamp": "2024-12-23T14:10:05.334Z",
+      "lastPushTimeStamp": "2024-12-23T14:32:24.200Z",
       "providerMetadata": {
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-dev-e6691-deployment/amplify-cfn-templates/function/aiplatformwebsite70aa5971-cloudformation-template.json",
         "logicalId": "functionaiplatformwebsite70aa5971"
       },
       "s3Bucket": {
         "deploymentBucketName": "amplify-aiplatformwebsite-dev-e6691-deployment",
-        "s3Key": "amplify-builds/aiplatformwebsite70aa5971-4d5a35332b3563384b76-build.zip"
-      }
+        "s3Key": "amplify-builds/aiplatformwebsite70aa5971-3453466453366c4a5349-build.zip"
+      },
+      "lastBuildTimeStamp": "2024-12-23T14:31:08.173Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2024-12-23T14:31:21.177Z",
+      "distZipFilename": "aiplatformwebsite70aa5971-3453466453366c4a5349-build.zip",
+      "lastPushDirHash": "4SFdS6lJSIrrB8nGUkbgE7br2gg="
     }
   },
   "hosting": {
