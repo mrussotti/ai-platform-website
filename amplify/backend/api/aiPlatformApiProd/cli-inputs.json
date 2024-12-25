@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "paths": {
+    "/neo4j/{dbname}": {
+      "name": "/neo4j/{dbname}",
+      "lambdaFunction": "aiplatformwebsite70aa5971",
+      "permissions": {
+        "setting": "open"
+      }
+    }
+  }
+}

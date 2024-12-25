@@ -37,7 +37,7 @@ def serialize_value(value):
     else:
         return str(value)
 
-def lambda_handler(event, context):
+def handler(event, context):
     print('Received event:', json.dumps(event))
 
     http_method = event.get('httpMethod', '')

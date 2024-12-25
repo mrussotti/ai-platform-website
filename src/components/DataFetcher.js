@@ -1,32 +1,25 @@
-// DataFetcher.js
-
 import React, { useState, useEffect } from 'react';
+import { API } from 'aws-amplify'; 
 import DataDisplay from './DataDisplay';
 import styles from './css/DataFetcher.module.css';
 
+const apiName = 'aiPlatformApiDev'; // change to aiPlatformApiProd for main branch
+
 export default function DataFetcher({ dbname }) {
   const [data, setData] = useState(null); 
-  const [loading, setLoading] = useState(false); // Loading state for data fetching
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const [customQuery, setCustomQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const [isExporting, setIsExporting] = useState(false); // New state for exporting
+  const path = `/neo4j/${dbname}`;
 
   const presetQueries = [
-    {
-      label: 'Fetch 5 Nodes',
-      query: 'MATCH (n) RETURN n LIMIT 5',
-    },
-    {
-      label: 'Create a Node',
-      query: "CREATE (n:Person {name: 'New Person'}) RETURN n",
-    },
-    {
-      label: 'Delete a Node',
-      query: "MATCH (n {name: 'New Person'}) DELETE n",
-    },    
+    { label: 'Fetch 5 Nodes', query: 'MATCH (n) RETURN n LIMIT 5' },
+    { label: 'Create a Node', query: "CREATE (n:Person {name: 'New Person'}) RETURN n" },
+    { label: 'Delete a Node', query: "MATCH (n {name: 'New Person'}) DELETE n" },
   ];
 
   const handleSubmit = (e) => {
@@ -47,106 +40,82 @@ export default function DataFetcher({ dbname }) {
   const handleReset = () => {
     setCustomQuery('');
     setIsSubmitting(false);
-    fetchData(); // Fetch default data
+    fetchData(); // Fetch default data again
   };
 
   const handleGraphVisualisation = () => {
-    if (!customQuery){
+    if (!customQuery) {
       alert('Please enter a query.');
       return;
     }
-    const graphUrl = new URL('viewgraph.html',window.location.origin);
+    const graphUrl = new URL('viewgraph.html', window.location.origin);
     graphUrl.searchParams.append('dbname', dbname);
     graphUrl.searchParams.append('query', customQuery);
     window.open(graphUrl.toString(), '_blank', 'width=800,height=600');
-  }
-
-  const fetchData = (query = null) => {
-    setLoading(true);
-    setError(null);
-
-    const apiUrl = `https://gjz0zq3tyd.execute-api.us-east-1.amazonaws.com/dev/neo4j/${dbname}`;
-
-    const fetchOptions = query
-      ? {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query }),
-        }
-      : {
-          method: 'GET',
-        };
-
-    fetch(apiUrl, fetchOptions)
-      .then((response) => {
-        console.log('Response status:', response.status);
-        console.log('Response status text:', response.statusText);
-        if (!response.ok) {
-          return response.json().then((errorData) => {
-            throw new Error(
-              `Network response was not ok: ${response.status} - ${errorData.error || response.statusText}`
-            );
-          });
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setData(data);
-        setLoading(false);
-        setIsSubmitting(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-        setError(error);
-        setLoading(false);
-        setIsSubmitting(false);
-      });
   };
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, [dbname]);
+  const fetchData = async (query = null) => {
+    setLoading(true);
+    setError(null);
+    try {
+      let responseData;
+      if (query) {
+        responseData = await API.post(apiName, path, {
+          body: { query },
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } else {
+        responseData = await API.get(apiName, path, {});
+      }
+      setData(responseData);
+      setIsSubmitting(false);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const handleExport = () => {
-    setIsExporting(true); // Set exporting state to true
+  const handleExport = async () => {
+    setIsExporting(true);
     setError(null);
 
-    const apiUrl = `https://gjz0zq3tyd.execute-api.us-east-1.amazonaws.com/dev/neo4j/${dbname}?export=csv`;
+    try {
+      const { default: awsconfig } = await import('../aws-exports');
+      const endpointInfo = awsconfig.aws_cloud_logic_custom.find(api => api.name === apiName);
 
-    fetch(apiUrl)
-      .then((response) => {
-        if (!response.ok) {
-          return response.text().then((errorText) => {
-            throw new Error(`Error: ${response.status} - ${errorText}`);
-          });
-        }
-        return response.text().then((csvData) => {
-          // Create a Blob from the CSV data
-          const blob = new Blob([csvData], { type: 'text/csv' });
-          const url = window.URL.createObjectURL(blob);
-          // Create a link to download the CSV file
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', 'graph_export.csv');
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          setIsExporting(false); // Set exporting state to false after download
-        });
-      })
-      .catch((error) => {
-        console.error('Error exporting data:', error);
-        setError(error);
-        setIsExporting(false); // Set exporting state to false on error
-      });
+      if (!endpointInfo) {
+        throw new Error('API endpoint not found in aws-exports.js');
+      }
+
+      const exportUrl = `${endpointInfo.endpoint}${path}?export=csv`;
+      const response = await fetch(exportUrl);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error exporting data: ${response.status} - ${errorText}`);
+      }
+
+      const csvData = await response.text();
+      const blob = new Blob([csvData], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'graph_export.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Error exporting data:', err);
+      setError(err);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
     <div className={styles.dataFetcherContainer}>
-
-      {/* Query Input Form */}
       <form onSubmit={handleSubmit} className={styles.form}>
         <label htmlFor="customQuery" className={styles.label}>
           Enter Custom Query:
@@ -157,7 +126,7 @@ export default function DataFetcher({ dbname }) {
           onChange={(e) => setCustomQuery(e.target.value)}
           placeholder="e.g., MATCH (n) RETURN n LIMIT 5"
           className={styles.input}
-          rows={4} // Adjust the number of visible rows as needed
+          rows={4}
         />
         <div className={styles.buttonContainer}>
           <button type="submit" disabled={isSubmitting} className={styles.button}>
@@ -167,7 +136,7 @@ export default function DataFetcher({ dbname }) {
             type="button"
             className={styles.exportButton}
             onClick={handleExport}
-            disabled={isExporting} // Disable based on isExporting
+            disabled={isExporting}
           >
             {isExporting ? 'Exporting...' : 'Download CSV'}
           </button>
@@ -180,7 +149,6 @@ export default function DataFetcher({ dbname }) {
         </div>
       </form>
 
-      {/* Preset Query Buttons */}
       <div className={styles.presetContainer}>
         {presetQueries.map((preset, index) => (
           <button
@@ -194,7 +162,6 @@ export default function DataFetcher({ dbname }) {
         ))}
       </div>
 
-      {/* Display Loading, Error, or Data */}
       {loading ? (
         <p>Loading data from {dbname}...</p>
       ) : error ? (

@@ -6,6 +6,11 @@ import Team from './pages/Team';
 import Projects from './pages/Projects';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
+import { Amplify } from 'aws-amplify';
+import awsconfig from './aws-exports';
+Amplify.configure(awsconfig);
+
+
 function App() {
   return (
     <Router>

@@ -12,24 +12,62 @@
       "AmplifyAppId": "d3ubh85diyi0no"
     }
   },
+  "api": {
+    "aiPlatformApiDev": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "aiplatformwebsite70aa5971"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway",
+      "output": {
+        "ApiName": "aiPlatformApiDev",
+        "RootUrl": "https://hbifv7x5k1.execute-api.us-east-1.amazonaws.com/dev",
+        "ApiId": "hbifv7x5k1"
+      },
+      "lastPushTimeStamp": "2024-12-23T15:07:31.035Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-dev-e6691-deployment/amplify-cfn-templates/api/aiPlatformApiDev-cloudformation-template.json",
+        "logicalId": "apiaiPlatformApiDev"
+      }
+    },
+    "aiPlatformApiProd": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "aiplatformwebsite70aa5971"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway",
+      "output": {
+        "ApiName": "aiPlatformApiProd",
+        "RootUrl": "https://6ms2szj023.execute-api.us-east-1.amazonaws.com/dev",
+        "ApiId": "6ms2szj023"
+      },
+      "lastPushTimeStamp": "2024-12-23T15:07:31.053Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-dev-e6691-deployment/amplify-cfn-templates/api/aiPlatformApiProd-cloudformation-template.json",
+        "logicalId": "apiaiPlatformApiProd"
+      }
+    }
+  },
   "function": {
     "aiplatformwebsite70aa5971": {
       "build": true,
+      "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "Lambda",
-      "lastBuildTimeStamp": "2024-12-09T14:50:19.604Z",
-      "lastBuildType": "PROD",
-      "lastPackageTimeStamp": "2024-12-09T14:50:31.096Z",
-      "distZipFilename": "aiplatformwebsite70aa5971-48623034794c55704b71-build.zip",
-      "s3Bucket": {
-        "deploymentBucketName": "amplify-aiplatformwebsite-dev-e6691-deployment",
-        "s3Key": "amplify-builds/aiplatformwebsite70aa5971-48623034794c55704b71-build.zip"
-      },
-      "providerMetadata": {
-        "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-dev-e6691-deployment/amplify-cfn-templates/function/aiplatformwebsite70aa5971-cloudformation-template.json",
-        "logicalId": "functionaiplatformwebsite70aa5971"
-      },
-      "lastPushTimeStamp": "2024-12-09T14:52:04.115Z",
       "output": {
         "LambdaExecutionRoleArn": "arn:aws:iam::619071311075:role/aiplatformwebsiteLambdaRoled2676099-dev",
         "Region": "us-east-1",
@@ -37,7 +75,20 @@
         "Name": "aiplatformwebsite70aa5971-dev",
         "LambdaExecutionRole": "aiplatformwebsiteLambdaRoled2676099-dev"
       },
-      "lastPushDirHash": "Hb04yLUpKql9Yc4sMdZ7nLI2jSc="
+      "lastPushTimeStamp": "2024-12-23T15:07:31.069Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-dev-e6691-deployment/amplify-cfn-templates/function/aiplatformwebsite70aa5971-cloudformation-template.json",
+        "logicalId": "functionaiplatformwebsite70aa5971"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-aiplatformwebsite-dev-e6691-deployment",
+        "s3Key": "amplify-builds/aiplatformwebsite70aa5971-3453466453366c4a5349-build.zip"
+      },
+      "lastBuildTimeStamp": "2024-12-23T14:31:08.173Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2024-12-23T14:31:21.177Z",
+      "distZipFilename": "aiplatformwebsite70aa5971-3453466453366c4a5349-build.zip",
+      "lastPushDirHash": "4SFdS6lJSIrrB8nGUkbgE7br2gg="
     }
   },
   "hosting": {
