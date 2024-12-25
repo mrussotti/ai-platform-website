@@ -31,7 +31,7 @@
         "RootUrl": "https://hbifv7x5k1.execute-api.us-east-1.amazonaws.com/dev",
         "ApiId": "hbifv7x5k1"
       },
-      "lastPushTimeStamp": "2024-12-23T14:32:23.923Z",
+      "lastPushTimeStamp": "2024-12-23T15:07:31.035Z",
       "providerMetadata": {
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-dev-e6691-deployment/amplify-cfn-templates/api/aiPlatformApiDev-cloudformation-template.json",
         "logicalId": "apiaiPlatformApiDev"
@@ -55,7 +55,7 @@
         "RootUrl": "https://6ms2szj023.execute-api.us-east-1.amazonaws.com/dev",
         "ApiId": "6ms2szj023"
       },
-      "lastPushTimeStamp": "2024-12-23T14:32:23.949Z",
+      "lastPushTimeStamp": "2024-12-23T15:07:31.053Z",
       "providerMetadata": {
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-dev-e6691-deployment/amplify-cfn-templates/api/aiPlatformApiProd-cloudformation-template.json",
         "logicalId": "apiaiPlatformApiProd"
@@ -75,7 +75,7 @@
         "Name": "aiplatformwebsite70aa5971-dev",
         "LambdaExecutionRole": "aiplatformwebsiteLambdaRoled2676099-dev"
       },
-      "lastPushTimeStamp": "2024-12-23T14:32:24.200Z",
+      "lastPushTimeStamp": "2024-12-23T15:07:31.069Z",
       "providerMetadata": {
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-aiplatformwebsite-dev-e6691-deployment/amplify-cfn-templates/function/aiplatformwebsite70aa5971-cloudformation-template.json",
         "logicalId": "functionaiplatformwebsite70aa5971"
