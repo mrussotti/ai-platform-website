@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { API } from 'aws-amplify'; 
 import DataDisplay from './DataDisplay';
 import styles from './css/DataFetcher.module.css';
+import { useQuery } from '../contexts/QueryContext';
+import { useNavigate } from 'react-router-dom';
 
 const apiName = 'aiPlatformApiDev'; // change to aiPlatformApiProd for main branch
 
@@ -9,15 +11,18 @@ export default function DataFetcher({ dbname }) {
   const [data, setData] = useState(null); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
   const [customQuery, setCustomQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const { setQueryData} = useQuery();
+  const {setGraphData} = useQuery();
+  const navigate = useNavigate();
 
   const path = `/neo4j/${dbname}`;
 
   const presetQueries = [
     { label: 'Fetch 5 Nodes', query: 'MATCH (n) RETURN n LIMIT 5' },
+    { label: 'Fetch 30 Relationships', query: 'MATCH p=()-[]->() RETURN p LIMIT 30;' },
     { label: 'Create a Node', query: "CREATE (n:Person {name: 'New Person'}) RETURN n" },
     { label: 'Delete a Node', query: "MATCH (n {name: 'New Person'}) DELETE n" },
   ];
@@ -48,10 +53,9 @@ export default function DataFetcher({ dbname }) {
       alert('Please enter a query.');
       return;
     }
-    const graphUrl = new URL('viewgraph.html', window.location.origin);
-    graphUrl.searchParams.append('dbname', dbname);
-    graphUrl.searchParams.append('query', customQuery);
-    window.open(graphUrl.toString(), '_blank', 'width=800,height=600');
+    setQueryData({custom_query: customQuery, dbname: dbname});
+    setGraphData(null);
+    navigate('/graphvisualise');
   };
 
   const fetchData = async (query = null) => {

@@ -97,6 +97,18 @@ export default function Navbar() {
                   >
                     Projects
                   </NavLink>
+                  <NavLink
+                    to="graphvisualise"
+                    className={({ isActive }) =>
+                      `rounded-md px-3 py-2 text-sm font-medium ${
+                        isActive
+                          ? "bg-gray-600 text-white"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`
+                    }
+                  >
+                    Graph Visualise
+                  </NavLink>
                 </div>
               </div>
             </div>
