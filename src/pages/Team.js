@@ -31,8 +31,8 @@ export default function Team() {
     {
       name: "Simran Meena",
       major: "Electrical Engineering",
-      year: "Junior",
-      bio: "Info about Simran"
+      year: "Junior at IIT Delhi",
+      bio: "I’m an Electrical Engineering student at IIT Delhi with an interest in technology and problem-solving. I enjoy working on projects related to development, open-source contributions, and machine learning. I focus on learning through hands-on experience and enjoy building things that make an impact."
     },
     {
       name: "Bhabatosh Senapati",
