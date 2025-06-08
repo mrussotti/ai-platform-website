@@ -74,7 +74,7 @@ export default function Navbar() {
                     Home
                   </NavLink>
                   <NavLink
-                    to="team"
+                    to="About"
                     className={({ isActive }) =>
                       `rounded-md px-3 py-2 text-sm font-medium ${
                         isActive
@@ -83,7 +83,7 @@ export default function Navbar() {
                       }`
                     }
                   >
-                    Team
+                    Project Overview
                   </NavLink>
                   <NavLink
                     to="projects"
@@ -95,9 +95,9 @@ export default function Navbar() {
                       }`
                     }
                   >
-                    Projects
+                    Neo4j
                   </NavLink>
-                  <NavLink
+                  {/* <NavLink
                     to="ML_Predictions"
                     className={({ isActive }) =>
                       `rounded-md px-3 py-2 text-sm font-medium ${
@@ -108,7 +108,7 @@ export default function Navbar() {
                     }
                   >
                     Machine Learning
-                  </NavLink>
+                  </NavLink> */}
                 </div>
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function Navbar() {
               Home
             </NavLink>
             <NavLink
-              to="team"
+              to="About"
               className={({ isActive }) =>
                 `block rounded-md px-3 py-2 text-base font-medium ${
                   isActive
@@ -142,7 +142,7 @@ export default function Navbar() {
                 }`
               }
             >
-              Team
+              Project Overview
             </NavLink>
             <NavLink
               to="projects"
@@ -154,9 +154,9 @@ export default function Navbar() {
                 }`
               }
             >
-              Projects
+              Neo4j
             </NavLink>
-            <NavLink
+            {/* <NavLink
                     to="ML_Predictions"
                     className={({ isActive }) =>
                       `rounded-md px-3 py-2 text-sm font-medium ${
@@ -167,7 +167,7 @@ export default function Navbar() {
                     }
                   >
                     Machine Learning
-            </NavLink>
+            </NavLink> */}
           </div>
         </div>
       </nav>
