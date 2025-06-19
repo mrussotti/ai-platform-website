@@ -1,0 +1,120 @@
+/* Overall container styles */
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Headings */
+  .title {
+    text-align: center;
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .section {
+    margin-bottom: 30px;
+  }
+  
+  .sectionTitle {
+    font-size: 1.5rem;
+    color: #444;
+    margin-bottom: 10px;
+  }
+  
+  /* Training results styles */
+  .trainingResults {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .modelResult {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    background: #f9f9f9;
+  }
+  
+  .modelTitle {
+    margin: 0 0 10px;
+    color: #333;
+  }
+  
+  .accuracy {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  .report {
+    background: #eee;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: Consolas, Menlo, Monaco, monospace;
+  }
+  
+  /* Prediction form styles */
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .textarea {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+  }
+  
+  .button {
+    align-self: flex-start;
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .button:hover:not(:disabled) {
+    background: #0056b3;
+  }
+  
+  /* Horizontal rule */
+  .hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 30px 0;
+  }
+  
+  /* Error messages */
+  .error {
+    color: #e74c3c;
+    font-weight: bold;
+  }
+  
+  /* Prediction result */
+  .predictionResult {
+    background: #dff0d8;
+    border: 1px solid #d0e9c6;
+    padding: 15px;
+    border-radius: 4px;
+    margin-top: 15px;
+  }
+  

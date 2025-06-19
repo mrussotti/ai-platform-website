@@ -74,7 +74,7 @@ export default function Navbar() {
                     Home
                   </NavLink>
                   <NavLink
-                    to="team"
+                    to="About"
                     className={({ isActive }) =>
                       `rounded-md px-3 py-2 text-sm font-medium ${
                         isActive
@@ -83,7 +83,7 @@ export default function Navbar() {
                       }`
                     }
                   >
-                    Team
+                    Project Overview
                   </NavLink>
                   <NavLink
                     to="projects"
@@ -95,9 +95,21 @@ export default function Navbar() {
                       }`
                     }
                   >
-                    Projects
+                    Neo4j
                   </NavLink>
-                  <NavLink
+                  {/* <NavLink
+                    to="ML_Predictions"
+                    className={({ isActive }) =>
+                      `rounded-md px-3 py-2 text-sm font-medium ${
+                        isActive
+                          ? "bg-gray-600 text-white"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`
+                    }
+                  >
+                    Machine Learning
+                  </NavLink> */}
+                  {/* <NavLink
                     to="graphvisualise"
                     className={({ isActive }) =>
                       `rounded-md px-3 py-2 text-sm font-medium ${
@@ -108,7 +120,7 @@ export default function Navbar() {
                     }
                   >
                     Graph Visualise
-                  </NavLink>
+                  </NavLink> */}
                 </div>
               </div>
             </div>
@@ -133,7 +145,7 @@ export default function Navbar() {
               Home
             </NavLink>
             <NavLink
-              to="team"
+              to="About"
               className={({ isActive }) =>
                 `block rounded-md px-3 py-2 text-base font-medium ${
                   isActive
@@ -142,7 +154,7 @@ export default function Navbar() {
                 }`
               }
             >
-              Team
+              Project Overview
             </NavLink>
             <NavLink
               to="projects"
@@ -154,8 +166,20 @@ export default function Navbar() {
                 }`
               }
             >
-              Projects
+              Neo4j
             </NavLink>
+            {/* <NavLink
+                    to="ML_Predictions"
+                    className={({ isActive }) =>
+                      `rounded-md px-3 py-2 text-sm font-medium ${
+                        isActive
+                          ? "bg-gray-600 text-white"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`
+                    }
+                  >
+                    Machine Learning
+            </NavLink> */}
           </div>
         </div>
       </nav>
