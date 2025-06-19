@@ -1,43 +1,45 @@
 import React from 'react';
+import SequenceDiagram from '../assets/911_sequence_diagram.png';
 
 export default function AboutProject() {
   return (
-    <div className="bg-black text-white min-h-screen">
-      <h1 className="text-center text-4xl font-bold py-10">About This Project</h1>
+    <div className="bg-black text-white min-h-screen py-10">
       <div className="max-w-3xl mx-auto px-6 space-y-8">
+        <h1 className="text-center text-4xl font-bold">About This Project</h1>
+
         <section>
-          <h2 className="text-2xl font-semibold mb-2">Project Overview</h2>
+          <h2 className="text-2xl font-semibold mb-2">What It Does</h2>
           <p className="text-base">
-            This project provides tools to assist 911 operators by ingesting call transcripts,
-            extracting structured data, and converting it into a graph representation.
-            The goal is to enable advanced analytics and machine learning on emergency response data,
-            improving insights into incident patterns and operator performance.
+            A simple web application for 911 centers to upload call transcripts as spreadsheets,
+            automatically extract key details (location, summary, participants),
+            deduplicate similar incidents, and store everything in a graph database for
+            fast, flexible queries and analytics.
+
+            The next stage of this project is to use the graph represtation of these 911 calls to perform machine learning.
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-2">Key Features</h2>
+          <h2 className="text-2xl font-semibold mb-2">Why It Matters</h2>
           <ul className="list-disc list-inside">
-            <li>Transcript ingestion and normalization</li>
-            <li>Automatic entity extraction (locations, persons, hazards)</li>
-            <li>Similarity-based incident deduplication</li>
-            <li>Graph persistence using Neo4j for flexible querying</li>
-            <li>RESTful API endpoints for real-time processing</li>
+            <li>Speeds up data entry by automating transcript processing</li>
+            <li>Detects repeated or related incidents automatically</li>
+            <li>Enables rich, graph-based reporting and machine-learning insights</li>
           </ul>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-2">Architecture</h2>
+          <h2 className="text-2xl font-semibold mb-2">How It Works</h2>
           <p className="text-base">
-            The backend is a Flask microservice that decodes Base64 transcripts,
-            runs NLP extraction, and performs deduplication via TF-IDF and Jaccard similarity.
-            Structured data is stored in Neo4j with nodes for Incidents, CallDetails,
-            Locations, Descriptions, and Persons, connected by semantic relationships.
+            Users upload a CSV of call transcripts via the React UI. The frontend parses
+            the file and sends rows to a Flask API, which extracts structured fields,
+            runs similarity checks to avoid duplicates, and writes nodes and
+            relationships into Neo4j for graph storage and exploration.
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-2">Technology Stack</h2>
+          <h2 className="text-2xl font-semibold mb-2">Tech Stack</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h3 className="font-medium">Frontend</h3>
@@ -45,16 +47,27 @@ export default function AboutProject() {
             </div>
             <div>
               <h3 className="font-medium">Backend</h3>
-              <p>Python, Flask, Neo4j, scikit-learn</p>
+              <p>Python, Flask</p>
             </div>
             <div>
               <h3 className="font-medium">Data Processing</h3>
-              <p>NLP extraction utilities, sklearn TF-IDF</p>
+              <p>Custom NLP extraction, similarity matching</p>
             </div>
             <div>
-              <h3 className="font-medium">Storage</h3>
-              <p>Neo4j Graph Database, JSON flat-file for similarity history</p>
+              <h3 className="font-medium">Database</h3>
+              <p>Neo4j Graph Database</p>
             </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold mb-2">Sequence Diagram</h2>
+          <div className="mt-4">
+            <img
+              src={SequenceDiagram}
+              alt="911 Upload Sequence Diagram"
+              className="w-full rounded border border-gray-700"
+            />
           </div>
         </section>
       </div>

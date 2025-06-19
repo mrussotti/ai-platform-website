@@ -6,10 +6,13 @@ import csv
 import io
 import sys
 import traceback
+
 from neo4j import GraphDatabase
 from neo4j.exceptions import Neo4jError
 from neo4j.graph import Node, Relationship, Path
 from neo4j.time import DateTime, Date
+
+from batch_utils import process_csv_file  # ← New import
 
 def serialize_value(value):
     if isinstance(value, Node):
@@ -39,14 +42,13 @@ def serialize_value(value):
 
 def handler(event, context):
     print('Received event:', json.dumps(event))
-
     http_method = event.get('httpMethod', '')
     path = event.get('path', '')
     query_params = event.get('queryStringParameters', {}) or {}
 
-    # Handle OPTIONS requests for CORS preflight
+    # CORS preflight
     if http_method == 'OPTIONS':
-        response = {
+        return {
             'statusCode': 200,
             'headers': {
                 'Content-Type': 'application/json',
@@ -56,8 +58,38 @@ def handler(event, context):
             },
             'body': ''
         }
-        return response
 
+    # ----------------------------------------------------------------
+    # New batch-upload endpoint for CSV of 911 records
+    # ----------------------------------------------------------------
+    if path == '/process_all_transcripts' and http_method == 'POST':
+        try:
+            body = json.loads(event.get('body', '[]') or '[]')
+            # process_csv_file expects a list of row‐dicts
+            result = process_csv_file(body)
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps(result)
+            }
+        except Exception as e:
+            print('Error in batch upload:', str(e))
+            traceback.print_exc()
+            return {
+                'statusCode': 500,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({'error': str(e)})
+            }
+
+    # ----------------------------------------------------------------
+    # Existing /neo4j/<dbname> logic
+    # ----------------------------------------------------------------
     path_parts = path.strip('/').split('/')
     if len(path_parts) >= 2 and path_parts[0] == 'neo4j':
         dbname = path_parts[1]
@@ -65,14 +97,14 @@ def handler(event, context):
         username_env = f'NEO4J_USERNAME_{dbname}'
         password_env = f'NEO4J_PASSWORD_{dbname}'
 
-        NEO4J_URI = os.environ.get(uri_env)
+        NEO4J_URI      = os.environ.get(uri_env)
         NEO4J_USERNAME = os.environ.get(username_env)
         NEO4J_PASSWORD = os.environ.get(password_env)
 
         if not NEO4J_URI or not NEO4J_USERNAME or not NEO4J_PASSWORD:
             error_message = f'Invalid database name or missing credentials for {dbname}'
             print(error_message)
-            response = {
+            return {
                 'statusCode': 400,
                 'headers': {
                     'Content-Type': 'application/json',
@@ -80,13 +112,11 @@ def handler(event, context):
                 },
                 'body': json.dumps({'error': error_message})
             }
-            return response
 
         try:
             print(f'Connecting to Neo4j at {NEO4J_URI} with user {NEO4J_USERNAME}')
             with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD)) as driver:
                 if http_method == 'GET':
-                    # Check if 'export' parameter is present
                     if query_params.get('export') == 'csv':
                         return export_graph_to_csv(driver)
                     else:
@@ -94,9 +124,7 @@ def handler(event, context):
                 elif http_method == 'POST':
                     return handle_custom_query(driver, event)
                 else:
-                    error_message = 'Method Not Allowed'
-                    print(error_message)
-                    response = {
+                    return {
                         'statusCode': 405,
                         'headers': {
                             'Content-Type': 'application/json',
@@ -104,45 +132,39 @@ def handler(event, context):
                             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
                             'Access-Control-Allow-Headers': 'Content-Type',
                         },
-                        'body': json.dumps({'error': error_message})
+                        'body': json.dumps({'error': 'Method Not Allowed'})
                     }
-                    return response
         except Exception as e:
-            error_message = f'Error initializing Neo4j driver: {str(e)}'
-            print(error_message)
+            print(f'Error initializing Neo4j driver: {str(e)}')
             traceback.print_exc()
-            response = {
+            return {
                 'statusCode': 500,
                 'headers': {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*'
                 },
-                'body': json.dumps({'error': error_message})
+                'body': json.dumps({'error': str(e)})
             }
-            return response
-    else:
-        error_message = 'Not found'
-        print(error_message)
-        response = {
-            'statusCode': 404,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({'error': error_message})
-        }
-        return response
+
+    # Fallback for any other path
+    return {
+        'statusCode': 404,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        },
+        'body': json.dumps({'error': 'Not found'})
+    }
+
 
 def get_default_data(driver):
     try:
         with driver.session() as session:
-            print('Executing default data query')
             result = session.run('MATCH (n) RETURN n LIMIT 10')
             records = []
             for record in result:
-                record_data = {key: serialize_value(value) for key, value in record.items()}
-                records.append(record_data)
-            response = {
+                records.append({k: serialize_value(v) for k,v in record.items()})
+            return {
                 'statusCode': 200,
                 'headers': {
                     'Content-Type': 'application/json',
@@ -150,219 +172,139 @@ def get_default_data(driver):
                 },
                 'body': json.dumps(records)
             }
-            return response
     except Neo4jError as e:
-        error_message = f'Database error during default data query: {str(e)}'
-        print(error_message)
+        print(f'Database error during default data query: {e}')
         traceback.print_exc()
-        response = {
+        return {
             'statusCode': 500,
             'headers': {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'error': error_message})
+            'body': json.dumps({'error': str(e)})
         }
-        return response
-    except Exception as e:
-        error_message = f'Internal server error during default data query: {str(e)}'
-        print(error_message)
-        traceback.print_exc()
-        response = {
-            'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({'error': error_message})
-        }
-        return response
+
 
 def handle_custom_query(driver, event):
     try:
         body_str = event.get('body', '{}') or '{}'
-        print('Event Body:', body_str)
         body = json.loads(body_str)
         query = body.get('query', '')
         if not query:
-            error_message = 'No query provided'
-            print(error_message)
-            response = {
+            return {
                 'statusCode': 400,
                 'headers': {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*'
                 },
-                'body': json.dumps({'error': error_message})
+                'body': json.dumps({'error': 'No query provided'})
             }
-            return response
         with driver.session() as session:
-            print(f'Executing custom query: {query}')
             result = session.run(query)
-            print("Result: ", result)
             records = []
             for record in result:
-                print("Record: ", record)
                 record_data = {}
                 for key, value in record.items():
                     if isinstance(value, Path):
                         record_data[key] = {
-                            'nodes': [serialize_value(node) for node in value.nodes],
-                            'relationships': [serialize_value(rel) for rel in value.relationships],
+                            'nodes': [serialize_value(n) for n in value.nodes],
+                            'relationships': [serialize_value(r) for r in value.relationships]
                         }
                     else:
                         record_data[key] = serialize_value(value)
                 records.append(record_data)
-            # Handle cases where no records are returned
-            if not records:
-                response_body = {'message': 'Query executed successfully.'}
-            else:
-                response_body = records
-            response = {
+            body = records or {'message': 'Query executed successfully.'}
+            return {
                 'statusCode': 200,
                 'headers': {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*'
                 },
-                'body': json.dumps(response_body)
+                'body': json.dumps(body)
             }
-            return response
-    except json.JSONDecodeError as e:
-        error_message = f'Invalid JSON in request body: {str(e)}'
-        print(error_message)
-        traceback.print_exc()
-        response = {
-            'statusCode': 400,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({'error': error_message})
-        }
-        return response
-    except Neo4jError as e:
-        error_message = f'Database error during custom query: {str(e)}'
-        print(error_message)
-        traceback.print_exc()
-        response = {
-            'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({'error': error_message})
-        }
-        return response
     except Exception as e:
-        error_message = f'Internal server error during custom query: {str(e)}'
-        print(error_message)
+        print(f'Error during custom query: {e}')
         traceback.print_exc()
-        response = {
+        return {
             'statusCode': 500,
             'headers': {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'error': error_message})
+            'body': json.dumps({'error': str(e)})
         }
-        return response
+
 
 def export_graph_to_csv(driver):
     try:
         with driver.session() as session:
-            print("Starting CSV export")
-            # Fetch all nodes
-            print("Fetching nodes")
-            nodes_result = session.run('MATCH (n) RETURN n LIMIT 100')
             nodes = []
-            for record in nodes_result:
-                node = record['n']
-                node_data = node._properties.copy()
-                node_data['id'] = node.id
-                node_data['labels'] = ';'.join(node.labels)
-                nodes.append(node_data)
-            print(f"Fetched {len(nodes)} nodes")
+            for rec in session.run('MATCH (n) RETURN n LIMIT 100'):
+                n = rec['n']
+                props = n._properties.copy()
+                props.update({'id': n.id, 'labels': ';'.join(n.labels)})
+                nodes.append(props)
 
-            # Fetch all relationships
-            print("Fetching relationships")
-            rels_result = session.run('MATCH ()-[r]->() RETURN r LIMIT 100')
-            relationships = []
-            for record in rels_result:
-                rel = record['r']
-                rel_data = rel._properties.copy()
-                rel_data['id'] = rel.id
-                rel_data['type'] = rel.type
-                rel_data['start_node_id'] = rel.start_node.id
-                rel_data['end_node_id'] = rel.end_node.id
-                relationships.append(rel_data)
-            print(f"Fetched {len(relationships)} relationships")
+            rels = []
+            for rec in session.run('MATCH ()-[r]->() RETURN r LIMIT 100'):
+                r = rec['r']
+                props = r._properties.copy()
+                props.update({
+                    'id': r.id,
+                    'type': r.type,
+                    'start_node_id': r.start_node.id,
+                    'end_node_id': r.end_node.id
+                })
+                rels.append(props)
 
-            # Convert nodes and relationships to CSV format
-            print("Converting nodes to CSV")
             nodes_csv = convert_to_csv(nodes)
-            print("Converting relationships to CSV")
-            relationships_csv = convert_to_csv(relationships)
+            rels_csv  = convert_to_csv(rels)
+            csv_data  = f"Nodes\n{nodes_csv}\nRelationships\n{rels_csv}"
 
-            # Combine the CSV data
-            csv_data = f"Nodes\n{nodes_csv}\nRelationships\n{relationships_csv}"
-
-            # Check the size of the CSV data
-            csv_size = sys.getsizeof(csv_data)
-            print(f"Total CSV data size: {csv_size} bytes")
-
-            # Ensure the CSV data size is within limits (6 MB for API Gateway)
-            if csv_size > 6 * 1024 * 1024:
-                error_message = "CSV data size exceeds the maximum allowed size of 6 MB"
-                print(error_message)
-                response = {
-                    'statusCode': 413,  # Payload Too Large
+            if sys.getsizeof(csv_data) > 6*1024*1024:
+                return {
+                    'statusCode': 413,
                     'headers': {
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'error': error_message})
+                    'body': json.dumps({'error': 'CSV data size exceeds 6 MB'})
                 }
-                return response
 
-            # Return the CSV data directly
-            print("Returning CSV data")
-            response = {
+            return {
                 'statusCode': 200,
                 'headers': {
                     'Content-Type': 'text/csv',
-                    'Content-Disposition': 'attachment; filename="graph_export.csv"',
-                    'Access-Control-Allow-Origin': '*',
+                    'Content-Disposition': 'attachment; filename=\"graph_export.csv\"',
+                    'Access-Control-Allow-Origin': '*'
                 },
                 'body': csv_data
             }
-            return response
     except Exception as e:
-        error_message = f'Error exporting graph to CSV: {str(e)}'
-        print(error_message)
+        print(f'Error exporting graph: {e}')
         traceback.print_exc()
-        response = {
+        return {
             'statusCode': 500,
             'headers': {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps({'error': error_message})
+            'body': json.dumps({'error': str(e)})
         }
-        return response
+
 
 def convert_to_csv(data_list):
     if not data_list:
         return ''
     output = io.StringIO()
+    # collect fieldnames
     fieldnames = set()
-    # Collect all fieldnames from all dictionaries
-    for data in data_list:
-        fieldnames.update(data.keys())
+    for item in data_list:
+        fieldnames.update(item.keys())
     fieldnames = list(fieldnames)
     writer = csv.DictWriter(output, fieldnames=fieldnames)
     writer.writeheader()
-    for data in data_list:
-        # Ensure all keys are present in data
-        row = {key: data.get(key, '') for key in fieldnames}
+    for item in data_list:
+        row = {key: item.get(key, '') for key in fieldnames}
         writer.writerow(row)
     return output.getvalue()
