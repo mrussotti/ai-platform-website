@@ -5,6 +5,8 @@ import { API } from 'aws-amplify';
 import Papa from 'papaparse';
 import DataDisplay from './DataDisplay';
 import styles from './css/DataFetcher.module.css';
+import { useQuery } from '../contexts/QueryContext';
+import { useNavigate } from 'react-router-dom';
 
 const apiName = 'aiPlatformApiDev';
 
